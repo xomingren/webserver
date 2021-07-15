@@ -5,22 +5,26 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h> //for bzero
-#include <iostream>
 #include <unistd.h>
 
-const uint8_t kMaxLine = 100;
-const uint16_t kMaxEvents = 500;
-const uint8_t kMaxListenFd = 5;
+#include<vector>
 
-using Socket = int;
+#include "define.h"
+#include "channel_class.h"
+
 class TcpServer
 {	
-private:
-	Socket CreateSocketAndListenOrDie();
 public:
-	TcpServer() = default;
+	TcpServer();
 	~TcpServer() = default;
 	void Start();
+private:
+	FD epollfd_;
+	FD listenfd_;
+	epoll_event events_[kMaxEvents];
+	static TcpServer* ptr_this;
 
+	SocketFD CreateSocketAndListenOrDie();
+	static void OnEvent(FD sockfd);
 };
 
