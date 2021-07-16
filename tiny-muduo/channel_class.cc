@@ -1,10 +1,12 @@
 #include "channel_class.h"
 
+#include <sys/epoll.h>
+
 Channel::Channel(FD epollfd,FD socketfd_):
 	epollfd_(epollfd), 
 	socketfd_(socketfd_),
-	revent_(0),
-	event_(0)
+	event_(0),
+	revent_(0)
 {
 }
 

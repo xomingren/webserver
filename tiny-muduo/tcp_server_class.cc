@@ -1,97 +1,27 @@
 #include "tcp_server_class.h"
 
+#include <iostream>//for cout
+
+#include<vector>
+
 using namespace std;
 
 TcpServer* TcpServer::ptr_this = nullptr;
 
 TcpServer::TcpServer()
+    :epollfd_(-1),
+    acceptor_(nullptr)
 {
     ptr_this = this;
 }
-SocketFD TcpServer::CreateSocketAndListenOrDie()
+
+void TcpServer::OnNewConnection(SocketFD socketfd)
 {
-    int optionval = 1;
-    SocketFD listensocket = socket(AF_INET, SOCK_STREAM, 0);
-    sockaddr_in servaddr;
-    fcntl(listensocket, F_SETFL, O_NONBLOCK); //no-block io
-    setsockopt(listensocket, SOL_SOCKET, SO_REUSEADDR, &optionval, sizeof(int));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons(11111);
-
-    if (-1 == bind(listensocket, reinterpret_cast<sockaddr*>(&servaddr), sizeof(servaddr)))
-    {
-        cout << "bind error, errno:" << errno << endl;
-    }
-
-    if (-1 == listen(listensocket, kMaxListenFd))//2nd param is the queue size kernel keeped that done with 3 handshake and haven't been accepted
-    {
-        cout << "listen error, errno:" << errno << endl;
-    }
-    return listensocket;
-}
-void TcpServer::OnEvent(FD sockfd)
-{
-    cout << "OnEvent:" << sockfd << endl;
-    if (sockfd == ptr_this->listenfd_)
-    {
-        SocketFD connectfd;
-        sockaddr_in cliaddr;
-        socklen_t clilen = sizeof(sockaddr_in);
-        connectfd = accept(ptr_this->listenfd_, reinterpret_cast<sockaddr*>(&cliaddr), &clilen);
-        if (connectfd > 0)
-        {
-            cout << "new connection from "
-                << "[" << inet_ntoa(cliaddr.sin_addr)
-                << ":" << ntohs(cliaddr.sin_port) << "]"
-                << " new socket fd:" << connectfd
-                << endl;
-        }
-        else
-        {
-            cout << "accept error, connfd:" << connectfd
-                << " errno:" << errno << endl;
-        }
-        fcntl(connectfd, F_SETFL, O_NONBLOCK); //no-block io
-
-        // Memory Leak !!!
-        //fucntion EnableRead() will fill its own *this pointer to a epoll_event ,then combain with epollfd_ and connectfd
-        //do not use local variant
-        Channel* channel = new Channel(ptr_this->epollfd_, connectfd);
-        channel->set_callbackfunc(OnEvent);
-        channel->EnableRead();
-    }
-    else
-    {
-        ssize_t readlength;
-        char line[kMaxLine];
-        if (sockfd < 0)
-        {
-            cout << "EPOLLIN sockfd < 0 error " << endl;
-            return;
-        }
-        bzero(line, kMaxLine);
-        if ((readlength = read(sockfd, line, kMaxLine)) < 0)
-        {
-            if (errno == ECONNRESET)
-            {
-                cout << "ECONNREST closed socket fd:" << sockfd << endl;
-                close(sockfd);
-            }
-        }
-        else if (readlength == 0)
-        {
-            cout << "read 0 closed socket fd:" << sockfd << endl;
-            close(sockfd);
-        }
-        else
-        {
-            if (write(sockfd, line, readlength) != readlength)
-                cout << "error: not finished one time" << endl;
-            string str = line;
-            cout << str << endl;
-        }
-    }
+    //acceptor get new connect callback to here,every tcpconnection had a channel* (to bind epollfd and socketfd)
+    //class channel will choose different callback(onaccept or on event) according to the
+    //owner(acceptor or tcpconnection)
+    TcpConnection* connection = new TcpConnection(ptr_this->epollfd_, socketfd);//meory leak
+    ptr_this->connections_[socketfd] = connection;
 }
 
 void TcpServer::Start()
@@ -99,11 +29,9 @@ void TcpServer::Start()
     epollfd_ = epoll_create(1);
     if (epollfd_ <= 0)
         cout << "epoll_create error, errno:" << epollfd_ << endl;
-    listenfd_ = CreateSocketAndListenOrDie();
-
-    Channel* channel = new Channel(epollfd_, listenfd_);
-    channel->set_callbackfunc(OnEvent);
-    channel->EnableRead();
+    acceptor_ = new Acceptor(epollfd_);//memory leak
+    acceptor_->set_callbackfunc(OnNewConnection);
+    acceptor_->Start();
 
     for (;;)
     {
@@ -125,7 +53,7 @@ void TcpServer::Start()
 
         for (const auto& it : channels)
         {
-            it->HandleEvent();
+            it->HandleEvent();//choose different callback
         }
     }
 }

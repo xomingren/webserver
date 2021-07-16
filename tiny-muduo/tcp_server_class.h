@@ -1,16 +1,14 @@
 #pragma once
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h> //for bzero
-#include <unistd.h>
 
-#include<vector>
+#include<sys/epoll.h>//for epoll event
 
-#include "define.h"
+#include <map>
+
+#include "acceptor_class.h"
 #include "channel_class.h"
+#include "define.h"
+#include "tcp_connection _class.h"
+
 
 class TcpServer
 {	
@@ -18,13 +16,14 @@ public:
 	TcpServer();
 	~TcpServer() = default;
 	void Start();
+	static void OnNewConnection(SocketFD socketfd);
 private:
-	FD epollfd_;
-	FD listenfd_;
-	epoll_event events_[kMaxEvents];
-	static TcpServer* ptr_this;
+	void update(Channel* channel,int op);
 
-	SocketFD CreateSocketAndListenOrDie();
-	static void OnEvent(FD sockfd);
+	FD epollfd_;
+	epoll_event events_[kMaxEvents];
+	std::map<SocketFD, TcpConnection*> connections_;
+	static TcpServer* ptr_this;
+	Acceptor* acceptor_;
 };
 
