@@ -1,6 +1,5 @@
 #include "acceptor_class.h"
 
-#include <sys/socket.h> //for accept setsockopt
 #include <arpa/inet.h>//for sockaddr_in
 #include <errno.h> //for errno
 #include <fcntl.h> // for fcntl()
@@ -10,9 +9,9 @@ using namespace std;
 
 Acceptor* Acceptor::ptr_this = nullptr;
 
-Acceptor::Acceptor(FD epollfd)
+Acceptor::Acceptor(EventLoop* loop)
   : acceptchannel_(nullptr),
-    epollfd_(epollfd),
+    loop_(loop),
     listenfd_(-1)
 {
     ptr_this = this;
@@ -50,8 +49,10 @@ void Acceptor::set_callbackfunc(CallBackFunc callbackfunc)
 void Acceptor::Start()
 {
     listenfd_ = CreateSocketAndListenOrDie();
-    acceptchannel_ = new Channel(epollfd_, listenfd_); // Memory Leak !!!
+    acceptchannel_ = new Channel(loop_, listenfd_); // Memory Leak !!!
     acceptchannel_->set_callbackfunc(OnAccept);
+    //the event int acceptchannel_ marked as EPOLLIN | EPOLLET ,means this channel will be triggered when in event comes(epoll_waits return)
+    //most important step because it'll sign its own channels' socketfd to epollfd
     acceptchannel_->EnableRead();
 }
 

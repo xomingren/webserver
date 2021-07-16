@@ -2,11 +2,13 @@
 
 #include <sys/epoll.h>
 
-Channel::Channel(FD epollfd,FD socketfd_):
-	epollfd_(epollfd), 
-	socketfd_(socketfd_),
-	event_(0),
-	revent_(0)
+#include "eventloop _class.h"
+
+Channel::Channel(EventLoop* loop,FD socketfd_)
+	: socketfd_(socketfd_),
+	  event_(0),
+	  revent_(0),
+	  loop_(loop)
 {
 }
 
@@ -23,7 +25,7 @@ void Channel::set_revent(uint32_t revent)
 void Channel::EnableRead()
 {
 	event_ =  EPOLLIN | EPOLLET ;
-	update();
+	Update();
 }
 
 void Channel::HandleEvent()
@@ -32,10 +34,17 @@ void Channel::HandleEvent()
 		callbackfunc_(socketfd_);
 }
 
-void Channel::update()
+void Channel::Update()
 {
-	epoll_event ev;
-	ev.data.ptr = this;
-	ev.events = event_;
-	epoll_ctl(epollfd_, EPOLL_CTL_ADD, socketfd_, &ev);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
+	//channel dont directly related to pollfd,but through eventloop 
+	loop_->Update(this);
+}
+uint32_t Channel::get_event() const
+{
+	return event_;
+}
+
+SocketFD Channel::get_socketfd() const
+{
+	return socketfd_;
 }

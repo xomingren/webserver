@@ -8,11 +8,11 @@
 
 using namespace std;
 
-TcpConnection::TcpConnection(FD epollfd, FD socketfd):
-    epollfd_(epollfd),
-    socketfd_(socketfd)
+TcpConnection::TcpConnection(EventLoop* loop, FD socketfd)
+    : socketfd_(socketfd),
+      loop_(loop)
 {
-    channel_ = new Channel(epollfd_, socketfd_); // Memory Leak !!!
+    channel_ = new Channel(loop_, socketfd_); // Memory Leak !!!
     channel_->set_callbackfunc(OnEvent);
     channel_->EnableRead();
 }

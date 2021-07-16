@@ -5,12 +5,15 @@
 class TcpConnection
 {
 public:
-	TcpConnection(FD epollfd, FD socketfd);
+	TcpConnection(EventLoop* loop, FD socketfd);
+	TcpConnection(const TcpConnection&) = delete;
+	TcpConnection& operator =(const TcpConnection&) = delete;
 	~TcpConnection() = default;
+
 	static void OnEvent(FD socketfd);
 private:
-	Channel* channel_;
-	FD epollfd_;
-	FD socketfd_;	
+	FD socketfd_;
+	EventLoop* loop_;
+	Channel* channel_;	
 };
 
