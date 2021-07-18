@@ -12,15 +12,14 @@ public:
 	Acceptor& operator =(const Acceptor&) = delete;
 	~Acceptor() = default;
 
-	static void OnAccept(FD socketfd);
-	void set_callbackfunc(CallBackFunc);
+	void OnAccept(FD socketfd);
+	void set_callbackfunc(SocketCallBack);
 	void Start();
 private:
 	SocketFD CreateSocketAndListenOrDie();
 
-	static Acceptor* ptr_this;
 	Channel* acceptchannel_;
-	CallBackFunc callbackfunc_;
+	SocketCallBack callbackfunc_;
 	EventLoop* loop_;
 	
 	FD listenfd_;	

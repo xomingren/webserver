@@ -12,7 +12,7 @@ Channel::Channel(EventLoop* loop,FD socketfd_)
 {
 }
 
-void Channel::set_callbackfunc(CallBackFunc callbackfunc)
+void Channel::set_callbackfunc(SocketCallBack callbackfunc)
 {
 	callbackfunc_ = callbackfunc;
 }

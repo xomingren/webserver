@@ -10,10 +10,20 @@ public:
 	TcpConnection& operator =(const TcpConnection&) = delete;
 	~TcpConnection() = default;
 
-	static void OnEvent(FD socketfd);
+	void OnRecieve(FD socketfd);
+	void OnConnectEstablished();
+
+	void Send(const std::string& message);
+	
+	void set_messagecallback(MessageCallBack messagecallback)
+	{	messagecallback_ = messagecallback;	  }
+	void set_connectioncallback(ConnectionCallBack connectioncallback)
+	{	connectioncallback_ = connectioncallback;	}
 private:
 	FD socketfd_;
 	EventLoop* loop_;
-	Channel* channel_;	
+	Channel* channel_;
+	MessageCallBack messagecallback_;
+	ConnectionCallBack connectioncallback_;
 };
 

@@ -14,7 +14,7 @@ public:
 	Channel& operator =(const Channel&) = delete;
 	~Channel() = default;
 
-	void set_callbackfunc(CallBackFunc);
+	void set_callbackfunc(SocketCallBack);
 	void set_revent(uint32_t);//events happening now
 	uint32_t get_event() const;
 	SocketFD get_socketfd() const;
@@ -27,7 +27,7 @@ private:
 	uint32_t event_;
 	uint32_t revent_;
 	
-	CallBackFunc callbackfunc_;
+	SocketCallBack callbackfunc_;
 	EventLoop* loop_;
 };
 #endif

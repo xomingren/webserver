@@ -3,8 +3,9 @@
 #include <errno.h>//for errno
 #include <unistd.h>//for read write close
 #include <iostream>//for cout
+#include <memory.h>
 
-#include <string.h> //for bzero and string
+//#include <string> //for string
 
 using namespace std;
 
@@ -13,11 +14,11 @@ TcpConnection::TcpConnection(EventLoop* loop, FD socketfd)
       loop_(loop)
 {
     channel_ = new Channel(loop_, socketfd_); // Memory Leak !!!
-    channel_->set_callbackfunc(OnEvent);
+    channel_->set_callbackfunc(bind(&TcpConnection::OnRecieve,this, socketfd_));
     channel_->EnableRead();
 }
 
-void TcpConnection::OnEvent(FD socketfd)
+void TcpConnection::OnRecieve(FD socketfd)
 {
     ssize_t readlength;
     char line[kMaxLine];
@@ -26,7 +27,7 @@ void TcpConnection::OnEvent(FD socketfd)
         cout << "EPOLLIN sockfd < 0 error " << endl;
         return;
     }
-    bzero(line, kMaxLine);
+    memset(line, 0, kMaxLine);
     if ((readlength = read(socketfd, line, kMaxLine)) < 0)
     {
         if (errno == ECONNRESET)
@@ -42,10 +43,26 @@ void TcpConnection::OnEvent(FD socketfd)
     }
     else
     {
-        if (write(socketfd, line, readlength) != readlength)
-            cout << "error: not finished one time" << endl;
-        string str = line;
-        cout << str << endl;
+        string buf(line, kMaxLine);
+        messagecallback_(this, buf);
     }
 }
+
+void TcpConnection::Send(const string& message)
+{
+    ssize_t n = ::write(socketfd_, message.c_str(), message.size());
+    if (n != static_cast<int>(message.size()))
+        cout << "write error ! " << message.size() - n << "bytes left" << endl;
+}
+
+void TcpConnection::OnConnectEstablished()
+{
+    connectioncallback_(this);
+}
+
+//void TcpConnection::setUser(IMuduoUser* user)
+//{
+//    _pUser = user;
+//}
+
 
