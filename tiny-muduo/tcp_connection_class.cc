@@ -1,4 +1,4 @@
-#include "tcp_connection _class.h"
+#include "tcp_connection_class.h"
 
 #include <errno.h>//for errno
 #include <unistd.h>//for read write close
@@ -6,6 +6,7 @@
 #include <memory.h>
 
 //#include <string> //for string
+#include "commonfunction.h"
 
 using namespace std;
 
@@ -43,14 +44,24 @@ void TcpConnection::OnRecieve(FD socketfd)
     }
     else
     {
-        string buf(line, kMaxLine);
+        char utf8[kMaxLine];
+        memset(utf8, 0, kMaxLine);
+        g2u(line, kMaxLine, utf8, kMaxLine);
+        string buf(utf8, kMaxLine);
         messagecallback_(this, buf);
     }
 }
 
 void TcpConnection::Send(const string& message)
 {
-    ssize_t n = ::write(socketfd_, message.c_str(), message.size());
+    char tmp[kMaxLine];
+    memset(tmp, 0, kMaxLine);
+    char gbk[kMaxLine];
+    memset(gbk, 0, kMaxLine);
+
+    memcpy(tmp, message.c_str(), message.size());
+    u2g(tmp, kMaxLine, gbk, kMaxLine);
+    ssize_t n = ::write(socketfd_, gbk, message.size());
     if (n != static_cast<int>(message.size()))
         cout << "write error ! " << message.size() - n << "bytes left" << endl;
 }

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "channel_class.h"
+#include "define.h"
+
 #include "epoll_class.h"
+
 
 class EventLoop
 {

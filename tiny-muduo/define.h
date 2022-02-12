@@ -4,7 +4,8 @@
 #include <bits/stdint-uintn.h>//for uint
 //forward declear
 class TcpConnection;
-
+class EventLoop;
+class Channel;
 
 using SocketFD = int;
 using FD = int;

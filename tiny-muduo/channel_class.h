@@ -3,7 +3,8 @@
 #define _CHANNEL_CLASS_H_
 #include "define.h"
 
-class EventLoop;
+//#include "eventloop _class.h"
+
 //this class relate combine socketfd and its callbackfunction
 //use update to relate socketfd and epollfd
 class Channel

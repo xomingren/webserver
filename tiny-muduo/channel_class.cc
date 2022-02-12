@@ -2,10 +2,10 @@
 
 #include <sys/epoll.h>
 
-#include "eventloop _class.h"
+#include "eventloop_class.h"
 
-Channel::Channel(EventLoop* loop,FD socketfd_)
-	: socketfd_(socketfd_),
+Channel::Channel(EventLoop* loop,FD socketfd)
+	: socketfd_(socketfd),
 	  event_(0),
 	  revent_(0),
 	  loop_(loop)
