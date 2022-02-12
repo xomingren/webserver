@@ -32,8 +32,20 @@ void Epoll::Poll(std::vector<Channel*>* channels)
 
 void Epoll::Update(Channel* channel)
 {
-    epoll_event ev;
-    ev.data.ptr = channel;
-    ev.events = channel->get_event();
-    epoll_ctl(epollfd_, EPOLL_CTL_ADD, channel->get_socketfd(), &ev);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
+    if (channel->get_index() == kNew)
+    {
+        epoll_event ev;
+        ev.data.ptr = channel;
+        ev.events = channel->get_event();
+        channel->set_index(kAdded);
+        epoll_ctl(epollfd_, EPOLL_CTL_ADD, channel->get_socketfd(), &ev);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
+    }
+    else
+    {
+        epoll_event ev;
+        ev.data.ptr = channel;
+        ev.events = channel->get_event();
+        epoll_ctl(epollfd_, EPOLL_CTL_ADD, channel->get_socketfd(), &ev);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
+    }
+    
 }

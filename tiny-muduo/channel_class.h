@@ -15,20 +15,35 @@ public:
 	Channel& operator =(const Channel&) = delete;
 	~Channel() = default;
 
-	void set_callbackfunc(SocketCallBack);
-	void set_revent(uint32_t);//events happening now
-	uint32_t get_event() const;
-	SocketFD get_socketfd() const;
+	void set_readcallbackfunc(EventCallback cb)
+	{ readcallbackfunc_ = std::move(cb); }
+	void set_writecallbackfunc(EventCallback cb)
+	{ writecallbackfunc_ = std::move(cb); }
+	void set_index(int index)
+	{ index_ = index; }
+	int get_index() const
+	{ return index_; }
+	void set_revent(uint32_t revent)//events happening now
+	{ revent_ = revent; }
+	uint32_t get_event() const
+	{ return event_; }
+	SocketFD get_socketfd() const
+	{ return socketfd_; }
 	void EnableRead();
+	void EnableWrite();
+	void DisableWrite();
+	bool IsWriting();
 	void HandleEvent();
 private:
 	void Update();//update my sockedfd to epfd
 
 	FD socketfd_;
+	int index_;
 	uint32_t event_;
 	uint32_t revent_;
 	
-	SocketCallBack callbackfunc_;
+	EventCallback readcallbackfunc_;
+	EventCallback writecallbackfunc_;
 	EventLoop* loop_;
 };
 #endif

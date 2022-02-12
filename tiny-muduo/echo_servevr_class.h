@@ -17,7 +17,7 @@ public:
     void Start()
     { tcpserver_.Start(); }
     void  OnConnection(TcpConnection* tcpconnection);
-    void  OnMessage(TcpConnection* tcpconnection,const std::string& data);
+    void  OnMessage(TcpConnection* tcpconnection,std::string* data);
 private:
     EventLoop* loop_;
     TcpServer tcpserver_;

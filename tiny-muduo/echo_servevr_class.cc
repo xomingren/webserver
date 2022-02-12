@@ -18,8 +18,13 @@ void EchoServer::OnConnection(TcpConnection* tcpconnection)
 	cout << "onconnection" << endl;;
 }
 
-void EchoServer::OnMessage(TcpConnection* tcpconnection, const string& data)
+void EchoServer::OnMessage(TcpConnection* tcpconnection,string* data)
 {
-	cout << data << endl;
-	tcpconnection->Send(data);
+	while (data->size() > kMessageLength)
+	{
+		string message = data->substr(0, kMessageLength);
+		*data = data->substr(kMessageLength, data->size());
+		cout << data << endl;
+		tcpconnection->Send(message + '\n');
+	}	
 }

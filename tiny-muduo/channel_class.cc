@@ -6,20 +6,11 @@
 
 Channel::Channel(EventLoop* loop,FD socketfd)
 	: socketfd_(socketfd),
+	  index_(-1),
 	  event_(0),
 	  revent_(0),
 	  loop_(loop)
 {
-}
-
-void Channel::set_callbackfunc(SocketCallBack callbackfunc)
-{
-	callbackfunc_ = callbackfunc;
-}
-
-void Channel::set_revent(uint32_t revent)
-{
-	revent_ = revent;
 }
 
 void Channel::EnableRead()
@@ -28,23 +19,33 @@ void Channel::EnableRead()
 	Update();
 }
 
+void Channel::EnableWrite()
+{
+	event_ |= EPOLLOUT;
+	Update();
+}
+
+void Channel::DisableWrite()
+{
+	event_ &= ~EPOLLOUT;
+	Update();
+}
+
+bool Channel::IsWriting()
+{
+	return event_ & EPOLLOUT;
+}
+
 void Channel::HandleEvent()
 {
 	if(revent_ & EPOLLIN)
-		callbackfunc_(socketfd_);
+		readcallbackfunc_();
+	if (revent_ & EPOLLOUT)
+		writecallbackfunc_();
 }
 
 void Channel::Update()
 {
 	//channel dont directly related to pollfd,but through eventloop 
 	loop_->Update(this);
-}
-uint32_t Channel::get_event() const
-{
-	return event_;
-}
-
-SocketFD Channel::get_socketfd() const
-{
-	return socketfd_;
 }

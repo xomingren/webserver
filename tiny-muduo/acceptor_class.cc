@@ -14,7 +14,7 @@ Acceptor::Acceptor(EventLoop* loop)
 {
 }
 
-void Acceptor::OnAccept(FD socketfd)
+void Acceptor::OnAccept()
 {
     SocketFD connectfd;
     sockaddr_in cliaddr;
@@ -38,16 +38,11 @@ void Acceptor::OnAccept(FD socketfd)
     callbackfunc_(connectfd);//callback in tcpserver,new tcpconnection and save in map there
 }
 
-void Acceptor::set_callbackfunc(SocketCallBack callbackfunc)
-{
-    callbackfunc_ = callbackfunc;
-}
-
 void Acceptor::Start()
 {
     listenfd_ = CreateSocketAndListenOrDie();
     acceptchannel_ = new Channel(loop_, listenfd_); // Memory Leak !!!
-    acceptchannel_->set_callbackfunc(bind(&Acceptor::OnAccept,this, listenfd_));
+    acceptchannel_->set_readcallbackfunc(bind(&Acceptor::OnAccept,this));
     //the event int acceptchannel_ marked as EPOLLIN | EPOLLET ,means this channel will be triggered when in event comes(epoll_waits return)
     //most important step because it'll sign its own channels' socketfd to epollfd
     acceptchannel_->EnableRead();

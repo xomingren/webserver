@@ -12,35 +12,38 @@ using namespace std;
 
 TcpConnection::TcpConnection(EventLoop* loop, FD socketfd)
     : socketfd_(socketfd),
-      loop_(loop)
+      loop_(loop),
+      inbuf_(new string()),
+      outbuf_(new string())
 {
     channel_ = new Channel(loop_, socketfd_); // Memory Leak !!!
-    channel_->set_callbackfunc(bind(&TcpConnection::OnRecieve,this, socketfd_));
+    channel_->set_readcallbackfunc(bind(&TcpConnection::OnRecieve,this));
     channel_->EnableRead();
 }
 
-void TcpConnection::OnRecieve(FD socketfd)
+void TcpConnection::OnRecieve()
 {
     ssize_t readlength;
     char line[kMaxLine];
-    if (socketfd < 0)
+    SocketFD sockfd = channel_->get_socketfd();
+    if (sockfd < 0)
     {
         cout << "EPOLLIN sockfd < 0 error " << endl;
         return;
     }
     memset(line, 0, kMaxLine);
-    if ((readlength = read(socketfd, line, kMaxLine)) < 0)
+    if ((readlength = read(sockfd, line, kMaxLine)) < 0)
     {
         if (errno == ECONNRESET)
         {
-            cout << "ECONNREST closed socket fd:" << socketfd << endl;
-            close(socketfd);
+            cout << "ECONNREST closed socket fd:" << sockfd << endl;
+            close(sockfd);
         }
     }
     else if (readlength == 0)
     {
-        cout << "read 0 closed socket fd:" << socketfd << endl;
-        close(socketfd);
+        cout << "read 0 closed socket fd:" << sockfd << endl;
+        close(sockfd);
     }
     else
     {
@@ -48,7 +51,25 @@ void TcpConnection::OnRecieve(FD socketfd)
         memset(utf8, 0, kMaxLine);
         g2u(line, kMaxLine, utf8, kMaxLine);
         string buf(utf8, kMaxLine);
-        messagecallback_(this, buf);
+        messagecallback_(this, &buf);
+    }
+}
+
+void TcpConnection::OnWrite()
+{
+    SocketFD sockfd = channel_->get_socketfd();
+    if (channel_->IsWriting())
+    {
+        int n = ::write(sockfd, outbuf_->c_str(), outbuf_->size());
+        if (n > 0)
+        {
+            cout << "write " << n << " bytes data again" << endl;
+            *outbuf_ = outbuf_->substr(n, outbuf_->size());
+            if (outbuf_->empty())
+            {
+                channel_->DisableWrite();
+            }
+        }
     }
 }
 
@@ -71,9 +92,5 @@ void TcpConnection::OnConnectEstablished()
     connectioncallback_(this);
 }
 
-//void TcpConnection::setUser(IMuduoUser* user)
-//{
-//    _pUser = user;
-//}
 
 
