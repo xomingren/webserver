@@ -1,3 +1,5 @@
+#include "commonfunction.h"
+#include "eventloop_class.h"
 #include "tcp_connection_class.h"
 
 #include <errno.h>//for errno
@@ -5,53 +7,35 @@
 #include <iostream>//for cout
 #include <memory.h>
 
-//#include <string> //for string
-#include "commonfunction.h"
-
 using namespace std;
 
 TcpConnection::TcpConnection(EventLoop* loop, FD socketfd)
     : socketfd_(socketfd),
       loop_(loop),
-      inbuf_(new string()),
-      outbuf_(new string())
+      highwatermark_(64 * 1024 * 1024)//default value, but finally decide by lib user
 {
     channel_ = new Channel(loop_, socketfd_); // Memory Leak !!!
     channel_->set_readcallbackfunc(bind(&TcpConnection::OnRecieve,this));
+    channel_->set_writecallbackfunc(bind(&TcpConnection::OnWrite, this));
     channel_->EnableRead();
 }
 
 void TcpConnection::OnRecieve()
 {
-    ssize_t readlength;
-    char line[kMaxLine];
     SocketFD sockfd = channel_->get_socketfd();
     if (sockfd < 0)
     {
         cout << "EPOLLIN sockfd < 0 error " << endl;
         return;
     }
-    memset(line, 0, kMaxLine);
-    if ((readlength = read(sockfd, line, kMaxLine)) < 0)
+    const ssize_t readlength = inbuf_.ReadFd(sockfd);
+    if (readlength > 0)
     {
-        if (errno == ECONNRESET)
-        {
-            cout << "ECONNREST closed socket fd:" << sockfd << endl;
-            close(sockfd);
-        }
-    }
-    else if (readlength == 0)
-    {
-        cout << "read 0 closed socket fd:" << sockfd << endl;
-        close(sockfd);
+        messagecallback_(/*shared_from_this()*/this, &inbuf_);//fixme
     }
     else
     {
-        char utf8[kMaxLine];
-        memset(utf8, 0, kMaxLine);
-        g2u(line, kMaxLine, utf8, kMaxLine);
-        string buf(utf8, kMaxLine);
-        messagecallback_(this, &buf);
+        //TDOD:close tcpconnection
     }
 }
 
@@ -60,31 +44,72 @@ void TcpConnection::OnWrite()
     SocketFD sockfd = channel_->get_socketfd();
     if (channel_->IsWriting())
     {
-        int n = ::write(sockfd, outbuf_->c_str(), outbuf_->size());
-        if (n > 0)
+        ssize_t wrotelength = ::write(sockfd, outbuf_.Peek(), outbuf_.ReadableBytes());
+        if (wrotelength > 0)
         {
-            cout << "write " << n << " bytes data again" << endl;
-            *outbuf_ = outbuf_->substr(n, outbuf_->size());
-            if (outbuf_->empty())
+            cout << "write " << wrotelength << " bytes data again" << endl;
+            outbuf_.Retrieve(wrotelength);
+            if (0 == outbuf_.ReadableBytes())//wrote done
             {
-                channel_->DisableWrite();
+                channel_->DisableWrite();//remove EPOLLOUT
+                if(writecompletecallback_)
+                    loop_->QueueInLoop(bind(writecompletecallback_,this)); //invoke onWriteComplete
             }
+            //if wrote undone,this func will be triggered again
         }
     }
 }
 
+// FIXME efficiency!!!
+void TcpConnection::Send(Buffer* message)
+{
+    Send(outbuf_.Peek(), outbuf_.ReadableBytes());
+    outbuf_.RetrieveAll();
+}
+
 void TcpConnection::Send(const string& message)
 {
-    char tmp[kMaxLine];
-    memset(tmp, 0, kMaxLine);
-    char gbk[kMaxLine];
-    memset(gbk, 0, kMaxLine);
+    Send(message.data(), message.size());
+}
 
-    memcpy(tmp, message.c_str(), message.size());
-    u2g(tmp, kMaxLine, gbk, kMaxLine);
-    ssize_t n = ::write(socketfd_, gbk, message.size());
-    if (n != static_cast<int>(message.size()))
-        cout << "write error ! " << message.size() - n << "bytes left" << endl;
+void TcpConnection::Send(const void* message, size_t len)
+{
+    ssize_t wrotelength = 0;
+    size_t remaining = len;
+    // 1.if nothing in output queue, try writing directly
+    if (!channel_->IsWriting() && 0 == outbuf_.ReadableBytes())
+    {
+        wrotelength = ::write(socketfd_, message, len);
+        if (wrotelength < 0) //wrote error
+            cout << "write error" << endl;
+        else //wrote succeed,not sure how many bytes wrote
+        {
+            remaining = len - wrotelength;
+            if (0 == remaining && writecompletecallback_)//all bytes wrote,call complete
+                loop_->QueueInLoop(bind(writecompletecallback_, this)); ////fixme with shared ptr
+        }
+    }
+    //2.output queue isn't empty(means kernel cache cann't take more) 
+    //3.or some bytes left unwrote,also means 2
+    //for 2 and 3,append the remaining on outbufs' tail
+    assert(remaining <= len);
+    if (remaining > 0)
+    {
+        size_t oldlen = outbuf_.ReadableBytes();
+        if (oldlen + remaining >= highwatermark_
+            && oldlen < highwatermark_//ensure called in rising edge
+            && highwatermarkcallback_)
+        {
+            loop_->QueueInLoop(bind(highwatermarkcallback_, this, oldlen + remaining));
+        }
+        outbuf_.Append(static_cast<const char*>(message) + wrotelength, remaining);
+        if (!channel_->IsWriting())//add EPOLLOUT
+        { 
+            channel_->EnableWrite();
+        }
+        //when kernel has more space,it'll notice epollfd with epoll_wait
+        //then trigger handlewrite()
+    }
 }
 
 void TcpConnection::OnConnectEstablished()

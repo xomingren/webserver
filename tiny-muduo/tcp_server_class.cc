@@ -20,6 +20,8 @@ void TcpServer::OnNewConnection(SocketFD socketfd)
     connections_[socketfd] = connection;
     connection->set_messagecallback(messagecallback_);
     connection->set_connectioncallback(connectioncallback_);
+    connection->set_writecompletecallback(writecompletecallback_);
+    connection->set_highwatermarkcallback(highwatermarkcallback_, highwatermark_);
     connection->OnConnectEstablished();
 }
 

@@ -20,16 +20,25 @@ public:
 	~TcpServer() = default;
 
 	void set_messagecallback(MessageCallBack messagecallback)
-	{	messagecallback_ = messagecallback;	  }
+	{ messagecallback_ = messagecallback; }
 	void set_connectioncallback(ConnectionCallBack connectioncallback)
-	{	connectioncallback_ = connectioncallback;   }
+	{ connectioncallback_ = connectioncallback; }
+	void set_writecompletecallback(WriteCompleteCallback cb)
+	{ writecompletecallback_ = std::move(cb); }
+	void set_highwatermarkcallback(HighWaterMarkCallback cb, size_t highwatermark)
+	{ highwatermarkcallback_ = cb; highwatermark_ = highwatermark; }
 	void Start();
 	void OnNewConnection(SocketFD socketfd);
 private:
 	std::map<SocketFD, TcpConnection*> connections_;
 	Acceptor* acceptor_;
+	EventLoop* loop_;
+	size_t highwatermark_;
+
 	ConnectionCallBack connectioncallback_;
 	MessageCallBack messagecallback_;
-	EventLoop* loop_;
+	WriteCompleteCallback writecompletecallback_;
+	HighWaterMarkCallback highwatermarkcallback_;
+	
 };
 

@@ -2,7 +2,9 @@
 
 #include <sys/epoll.h>
 #include <errno.h> //for errno
+
 #include <iostream>//for cout
+#include <string.h>//for memset
 
 using namespace std;
 
@@ -32,20 +34,21 @@ void Epoll::Poll(std::vector<Channel*>* channels)
 
 void Epoll::Update(Channel* channel)
 {
-    if (channel->get_index() == kNew)
+    if (channel->get_epollstatus() == EpollStatus::kNew)// a new one, add with EPOLL_CTL_ADD
     {
-        epoll_event ev;
-        ev.data.ptr = channel;
-        ev.events = channel->get_event();
-        channel->set_index(kAdded);
-        epoll_ctl(epollfd_, EPOLL_CTL_ADD, channel->get_socketfd(), &ev);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
+        epoll_event event;
+        memset(&event, 0, sizeof event);
+        event.data.ptr = channel;
+        event.events = channel->get_event();
+        channel->set_epollstatus(EpollStatus::kAdded);//when a new channel updated once, the second time we update it will fall into the 'else' down below
+        epoll_ctl(epollfd_, EPOLL_CTL_ADD, channel->get_socketfd(), &event);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
     }
-    else
+    else// update existing one with EPOLL_CTL_MOD/DEL
     {
-        epoll_event ev;
-        ev.data.ptr = channel;
-        ev.events = channel->get_event();
-        epoll_ctl(epollfd_, EPOLL_CTL_ADD, channel->get_socketfd(), &ev);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
+        epoll_event event;
+        event.data.ptr = channel;
+        event.events = channel->get_event();//EPOLLOUT etc
+        epoll_ctl(epollfd_, EPOLL_CTL_MOD, channel->get_socketfd(), &event);//3rd param means the fd to be added and concerned,4th param means what event we want the kernel concerned aboout the fd
     }
     
 }

@@ -6,7 +6,7 @@
 
 Channel::Channel(EventLoop* loop,FD socketfd)
 	: socketfd_(socketfd),
-	  index_(-1),
+	  epollstatus_(EpollStatus::kNew),//mark itself as a new channel
 	  event_(0),
 	  revent_(0),
 	  loop_(loop)
@@ -30,8 +30,9 @@ void Channel::DisableWrite()
 	event_ &= ~EPOLLOUT;
 	Update();
 }
+// EPOLLOUT means Writing now will not block.
 
-bool Channel::IsWriting()
+bool Channel::IsWriting()  
 {
 	return event_ & EPOLLOUT;
 }

@@ -1,5 +1,4 @@
-#ifndef _CF_H_
-#define _CF_H_
+#pragma once
 
 #include <iconv.h>
 #include <memory.h>
@@ -12,4 +11,3 @@ extern int u2g(char* inbuf, size_t inlen, char* outbuf, size_t outlen);
 
 extern int g2u(char* inbuf, size_t inlen, char* outbuf, size_t outlen);
 
-#endif
