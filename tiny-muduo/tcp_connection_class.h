@@ -1,10 +1,10 @@
 #pragma once
 
+#include <memory>//for enbale_shared_from_this
+
 #include "buffer_class.h"
 #include "channel_class.h"
 #include "define.h"
-
-#include <memory>
 
 class TcpConnection :public std::enable_shared_from_this<TcpConnection>
 {

@@ -1,7 +1,10 @@
 #pragma once
-#include <string>
-#include<functional>//for function
+
 #include <bits/stdint-uintn.h>//for uint
+
+#include <functional>//for function
+#include <string>
+
 
 //forward declear
 class TcpConnection;
@@ -18,6 +21,7 @@ using ConnectionCallBack = std::function<void(TcpConnection* connection)>;
 using WriteCompleteCallback = std::function<void(TcpConnection* connection)>;
 using HighWaterMarkCallback = std::function<void(TcpConnection*, size_t)>;
 using Functor = std::function<void()>;
+using TimerCallback = std::function<void()>;
 
 static const uint8_t kTmpBufferLength = 100;
 static const uint16_t kMaxEvents = 500;
@@ -25,8 +29,8 @@ static const uint8_t kMaxListenFd = 5;
 static const uint8_t kMessageLength = 100;
 static const size_t kInitialSize = 1024;
 static const size_t kCheapPrepend = 8;
-//static const char kNew = -1;
-//static const char kAdded = 1;
+
+
 const char kCRLF[] = "\r\n";
 
 enum class EpollStatus:char

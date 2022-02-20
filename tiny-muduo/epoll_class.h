@@ -2,8 +2,9 @@
 
 #include <vector>
 
-#include "define.h"
 #include "channel_class.h"
+#include "define.h"
+
 //a epollfd manage class,
 //once epoll_wait return,
 //get the active fd(and the pointer to channel within it) from events[]
@@ -18,6 +19,8 @@ public:
 
 	void Poll(std::vector<Channel*>* channels);
 	void Update(Channel* channel);
+
+
 private:
 	FD epollfd_;
 };

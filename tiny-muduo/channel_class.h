@@ -2,8 +2,6 @@
 
 #include "define.h"
 
-//#include "eventloop _class.h"
-
 //this class relate combine socketfd and its callbackfunction
 //use update to relate socketfd and epollfd
 class Channel
@@ -35,8 +33,8 @@ public:
 	uint32_t get_event() const
 	{ return event_; }
 
-	SocketFD get_socketfd() const
-	{ return socketfd_; }
+	SocketFD get_FD() const
+	{ return FD_; }
 
 	void EnableRead();
 	void EnableWrite();
@@ -47,7 +45,7 @@ public:
 private:
 	void Update();//update my sockedfd to epfd
 
-	FD socketfd_;
+	FD FD_;//sockfd,timefd
 	EpollStatus epollstatus_;
 	uint32_t event_;
 	uint32_t revent_;

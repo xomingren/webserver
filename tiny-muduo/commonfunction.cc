@@ -1,5 +1,7 @@
 #include "commonfunction.h"
 
+#include <memory.h>//for memset
+
 int code_convert(const char* from_charset, const char* to_charset, char* inbuf, size_t inlen, char* outbuf, size_t outlen)
 {
 	iconv_t cd;

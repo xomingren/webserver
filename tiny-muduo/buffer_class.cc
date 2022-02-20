@@ -1,9 +1,9 @@
 #include "buffer_class.h"
 
-#include<iostream>
-
 #include <sys/uio.h>//for readv
 #include <unistd.h>//for close()
+
+#include<iostream>//for cout
 
 using namespace std;
 
@@ -20,7 +20,7 @@ ssize_t Buffer::ReadFd(FD fd)
     // when there is enough space in this buffer, don't read into extrabuf.
     // when extrabuf is used, we read 128k-1 bytes at most.
     const int iovcnt = (writable < sizeof extrabuf) ? 2 : 1;
-    const ssize_t readlength = ::readv(fd, vec, iovcnt);
+    const ssize_t readlength = ::readv(fd, vec, iovcnt);//problemmark
     if (readlength < 0)
     {
         if (errno == ECONNRESET)

@@ -1,21 +1,33 @@
 ﻿#include "eventloop_class.h"
 
+#include <sys/eventfd.h>
+#include <unistd.h>//for read/write
+
 #include <iostream>
 #include <vector>
 
-#include <sys/eventfd.h>
-#include <unistd.h>
+#include "timerqueue_class.h"
 
 using namespace std;
 
 EventLoop::EventLoop()
-	:quit_(false),
-	 poller_(new Epoll())
+  :  threadId_(1),//fixme,
+     quit_(false),
+	 poller_(new Epoll()),
+     wakeupfd_(CreateEventFd()),
+     wakeupchannel_(new Channel(this, wakeupfd_)),
+     timerqueue_(new TimerQueue(this))
 {
-    wakeupfd_ = CreateEventFd();
-    wakeupchannel_ = new Channel(this, wakeupfd_); // Memory Leak !!!
     wakeupchannel_->set_readcallbackfunc(bind(&EventLoop::HandleRead,this));//fixme
     wakeupchannel_->EnableRead();
+}
+
+EventLoop::~EventLoop()
+{
+    //wakeupchannel_->disableAll();
+    //wakeupchannel_->remove();
+    ::close(wakeupfd_);
+    //t_loopInThisThread = NULL;
 }
 
 void EventLoop::Loop()
@@ -41,6 +53,17 @@ void EventLoop::Loop()
 void EventLoop::Update(Channel* channel)
 {
     poller_->Update(channel);
+}
+void EventLoop::RunInLoop(Functor cb)
+{
+    if (IsInLoopThread())
+    {
+        cb();
+    }
+    else
+    {
+        QueueInLoop(std::move(cb));
+    }
 }
 void EventLoop::QueueInLoop(Functor cb)
 {
@@ -91,4 +114,26 @@ void EventLoop::DoPendingFunctors()
     {
         functor();
     }
+}
+
+TimerId EventLoop::RunAt(Timestamp time, TimerCallback cb)
+{
+    return timerqueue_->AddTimer(std::move(cb), time, 0.0);
+}
+
+TimerId EventLoop::RunAfter(double delay, TimerCallback cb)
+{
+    Timestamp time(addTime(Timestamp::Now(), delay));
+    return RunAt(time, std::move(cb));
+}
+
+TimerId EventLoop::RunEvery(double interval, TimerCallback cb)
+{
+    Timestamp time(addTime(Timestamp::Now(), interval));
+    return timerqueue_->AddTimer(std::move(cb), time, interval);
+}
+
+void EventLoop::Cancel(TimerId timerId)
+{
+    return timerqueue_->Cancel(timerId);
 }

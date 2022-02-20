@@ -1,10 +1,10 @@
 #pragma once
-//#include "define.h"
-//#include <string>
-#include "define.h"
 
 #include <assert.h>
+
 #include <vector>
+
+#include "define.h"
 
 class Buffer
 {

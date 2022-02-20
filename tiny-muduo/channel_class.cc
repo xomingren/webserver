@@ -5,7 +5,7 @@
 #include "eventloop_class.h"
 
 Channel::Channel(EventLoop* loop,FD socketfd)
-	: socketfd_(socketfd),
+	: FD_(socketfd),
 	  epollstatus_(EpollStatus::kNew),//mark itself as a new channel
 	  event_(0),
 	  revent_(0),

@@ -1,11 +1,12 @@
-#include "commonfunction.h"
-#include "eventloop_class.h"
 #include "tcp_connection_class.h"
 
 #include <errno.h>//for errno
 #include <unistd.h>//for read write close
 #include <iostream>//for cout
-#include <memory.h>
+//#include <memory.h>
+
+#include "commonfunction.h"
+#include "eventloop_class.h"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ TcpConnection::TcpConnection(EventLoop* loop, FD socketfd)
 
 void TcpConnection::OnRecieve()
 {
-    SocketFD sockfd = channel_->get_socketfd();
+    SocketFD sockfd = channel_->get_FD();
     if (sockfd < 0)
     {
         cout << "EPOLLIN sockfd < 0 error " << endl;
@@ -41,7 +42,7 @@ void TcpConnection::OnRecieve()
 
 void TcpConnection::OnWrite()
 {
-    SocketFD sockfd = channel_->get_socketfd();
+    SocketFD sockfd = channel_->get_FD();
     if (channel_->IsWriting())
     {
         ssize_t wrotelength = ::write(sockfd, outbuf_.Peek(), outbuf_.ReadableBytes());

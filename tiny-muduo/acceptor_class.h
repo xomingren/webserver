@@ -1,7 +1,7 @@
 #pragma once
 
-#include "define.h"
 #include "channel_class.h"
+#include "define.h"
 #include "eventloop_class.h"
 
 class Acceptor
