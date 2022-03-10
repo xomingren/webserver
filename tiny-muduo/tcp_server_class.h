@@ -3,13 +3,13 @@
 #include<sys/epoll.h>//for epoll event
 
 #include <map>
+#include <string>
 
 #include "acceptor_class.h"
 #include "channel_class.h"
 #include "define.h"
 #include "eventloop_class.h"
 #include "tcp_connection_class.h"
-
 
 class TcpServer
 {	
@@ -29,11 +29,17 @@ public:
 	{ highwatermarkcallback_ = cb; highwatermark_ = highwatermark; }
 	void Start();
 	void OnNewConnection(SocketFD socketfd);
+
 private:
-	std::map<SocketFD, TcpConnection*> connections_;
+	void RemoveConnection(const TcpConnectionPtr& conn);
+	void RemoveConnectionInLoop(const TcpConnectionPtr& conn);
+
+	using ConnectionMap = std::map<std::string, TcpConnectionPtr>;
+	ConnectionMap connections_;
 	Acceptor* acceptor_;
 	EventLoop* loop_;
 	size_t highwatermark_;
+	int nextconnid_;
 
 	ConnectionCallBack connectioncallback_;
 	MessageCallBack messagecallback_;

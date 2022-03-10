@@ -3,6 +3,7 @@
 #include <memory>//for unique_ptr
 #include <vector>
 
+#include "current_thread_class.h"
 #include "define.h"
 #include "epoll_class.h"
 #include "timerid_class.h"
@@ -20,7 +21,20 @@ public:
 
     void Loop();
     void Update(Channel* channel);
-    bool IsInLoopThread() const { /*return threadId_ == CurrentThread::tid(); */ return true; }
+
+    void AssertInLoopThread()
+    {
+        if (!IsInLoopThread())
+        {
+            AbortNotInLoopThread();
+        }
+    }
+
+    bool IsInLoopThread() const
+    {  return threadId_ == CurrentThread::Tid();  }
+
+    void AbortNotInLoopThread();
+
     /// Runs callback immediately in the loop thread.
  /// It wakes up the loop, and run the cb.
  /// If in the same loop thread, cb is run within the function.
@@ -30,6 +44,9 @@ public:
 
     void HandleRead();
     void HandleWrite();
+
+    bool HasChannel(Channel* channel);
+    void RemoveChannel(Channel* channel);
 
     // timers
 
@@ -61,6 +78,7 @@ private:
     const pid_t threadId_;
     bool quit_;
     Epoll* poller_;
+    Timestamp pollreturntime_;
     FD wakeupfd_;
     Channel* wakeupchannel_;
     std::vector<Functor> pendingfunctors_;

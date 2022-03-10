@@ -1,13 +1,45 @@
 #include "echo_servevr_class.h"
 
+#include <atomic>
 #include <functional>//for std::bind
 #include <iostream>//for cout
 #include <memory.h>//for memset
+#include <string>
 
+#include "buffer_class.h"
 #include "commonfunction.h"
+#include "eventloop_class.h"
+#include "tcp_connection_class.h"
+#include "tcp_server_class.h"
 
 using namespace std;
 
+class EchoServer
+{
+public:
+	EchoServer(EventLoop* loop);
+	EchoServer(const EchoServer&) = delete;
+	EchoServer& operator =(const EchoServer&) = delete;
+	~EchoServer() = default;
+
+	void Start()
+	{
+		tcpserver_.Start();
+	}
+	void OnConnection(TcpConnection* tcpconnection);
+	void OnMessage(TcpConnection* tcpconnection, Buffer* buf);
+	void OnWriteComplete(TcpConnection* tcpconnection);
+	void OnHighWaterMark(TcpConnection* tcpconnection, size_t len);
+	void PrintThroughput();
+private:
+	EventLoop* loop_;
+	TcpServer tcpserver_;
+
+	std::atomic<int64_t> transferred_;
+	std::atomic<int64_t> receivedmessages_;
+	int64_t oldcounter_;
+	Timestamp starttime_;
+};
 EchoServer::EchoServer(EventLoop* loop)
 	: loop_(loop),
 	  tcpserver_(loop),
@@ -70,4 +102,13 @@ void EchoServer::PrintThroughput()
 
 	oldcounter_ = newcounter;
 	starttime_ = endtime;
+}
+
+int main(int args, char** argv)
+{
+	EventLoop loop;
+	EchoServer echoserver(&loop);
+	echoserver.Start();
+	loop.Loop();
+	return 0;
 }

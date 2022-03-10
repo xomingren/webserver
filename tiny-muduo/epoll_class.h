@@ -4,6 +4,7 @@
 
 #include "channel_class.h"
 #include "define.h"
+#include "timestamp_class.h"
 
 //a epollfd manage class,
 //once epoll_wait return,
@@ -17,7 +18,7 @@ public:
 	Epoll& operator =(const Epoll&) = delete;
 	~Epoll() = default;
 
-	void Poll(std::vector<Channel*>* channels);
+	Timestamp Poll(std::vector<Channel*>* channels);
 	void Update(Channel* channel);
 
 

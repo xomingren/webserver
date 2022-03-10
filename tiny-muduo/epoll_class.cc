@@ -15,14 +15,14 @@ Epoll::Epoll()
         cout << "epoll_create error, errno:" << epollfd_ << endl;
 }
 
-void Epoll::Poll(std::vector<Channel*>* channels)
+Timestamp Epoll::Poll(std::vector<Channel*>* channels)
 {
     epoll_event events[kMaxEvents];
     FD fds = epoll_wait(epollfd_, events, kMaxEvents, -1);
+    Timestamp now(Timestamp::Now());
     if (fds == -1)
     {
         cout << "epoll_wait error, errno:" << errno << endl;
-            return;
     }
     for (int i = 0; i < fds; ++i)
     {
@@ -30,6 +30,7 @@ void Epoll::Poll(std::vector<Channel*>* channels)
         channel->set_revent(events[i].events);//mark this channel with what event happend
         channels->push_back(channel);
     }
+    return now;
 }
 
 void Epoll::Update(Channel* channel)

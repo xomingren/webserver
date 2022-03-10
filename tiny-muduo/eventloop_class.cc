@@ -3,6 +3,7 @@
 #include <sys/eventfd.h>
 #include <unistd.h>//for read/write
 
+#include <assert.h>
 #include <iostream>
 #include <vector>
 
@@ -11,14 +12,14 @@
 using namespace std;
 
 EventLoop::EventLoop()
-  :  threadId_(1),//fixme,
+  :  threadId_(CurrentThread::Tid()),//fixme,
      quit_(false),
 	 poller_(new Epoll()),
      wakeupfd_(CreateEventFd()),
      wakeupchannel_(new Channel(this, wakeupfd_)),
      timerqueue_(new TimerQueue(this))
 {
-    wakeupchannel_->set_readcallbackfunc(bind(&EventLoop::HandleRead,this));//fixme
+    wakeupchannel_->set_readcallback(bind(&EventLoop::HandleRead,this));//fixme
     wakeupchannel_->EnableRead();
 }
 
@@ -36,7 +37,7 @@ void EventLoop::Loop()
     {
         cout << "epoll waiting等待..." << endl;
         vector<Channel*> channels;
-        poller_->Poll(&channels);
+        pollreturntime_ = poller_->Poll(&channels);
 
         for (const auto& it : channels)
         {
@@ -44,7 +45,7 @@ void EventLoop::Loop()
             //1.if channel is acceptchannel ,use OnAccept() and the socketfd returned to generate a new tcpconnection in tcpserver
             //2.if channel is tcpconnection, use OnEvent() to decode compute encode etc
             //  2.1  if epoll_out triggered,use HandleWrite()
-            it->HandleEvent();
+            it->HandleEvent(pollreturntime_);
         }
         DoPendingFunctors();
     }
@@ -136,4 +137,31 @@ TimerId EventLoop::RunEvery(double interval, TimerCallback cb)
 void EventLoop::Cancel(TimerId timerId)
 {
     return timerqueue_->Cancel(timerId);
+}
+
+void EventLoop::AbortNotInLoopThread()
+{
+    cout << "EventLoop::abortNotInLoopThread - EventLoop " << this
+        << " was created in threadId_ = " << threadId_
+        << ", current thread id = " << CurrentThread::Tid();
+}
+
+bool EventLoop::HasChannel(Channel* channel)
+{
+    assert(channel->OwnerLoop() == this);
+    AssertInLoopThread();
+    //return poller_->hasChannel(channel); //fixme
+    return true;
+}
+
+void EventLoop::RemoveChannel(Channel* channel)
+{
+    /*assert(channel->ownerLoop() == this);
+    AssertInLoopThread();
+    if (eventhandling_)
+    {
+        assert(currentActiveChannel_ == channel ||
+            std::find(activeChannels_.begin(), activeChannels_.end(), channel) == activeChannels_.end());
+    }
+    poller_->removeChannel(channel);*/
 }

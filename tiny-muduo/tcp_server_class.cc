@@ -1,12 +1,17 @@
 #include "tcp_server_class.h"
 
+#include <stdio.h>
+
 #include <iostream>//for cout
+#include <memory>//for make_shared
+#include <string>
 
 using namespace std;
 
 TcpServer::TcpServer(EventLoop* loop)
     : acceptor_(nullptr),  
-      loop_(loop)
+      loop_(loop),
+      nextconnid_(1)
 {
 }
 
@@ -15,13 +20,41 @@ void TcpServer::OnNewConnection(SocketFD socketfd)
     //acceptor get new connect callback to here,every tcpconnection had a channel* (to bind epollfd and socketfd)
     //class channel will choose different callback(onaccept or on event) according to the
     //owner(acceptor or tcpconnection)
-    TcpConnection* connection = new TcpConnection(loop_, socketfd);//memory leak
-    connections_[socketfd] = connection;
+    loop_->AssertInLoopThread();
+    //EventLoop* ioLoop = threadPool_->getNextLoop(); //fixeme
+    char buf[64];
+    snprintf(buf, sizeof buf, "-%d", nextconnid_);
+    ++nextconnid_;
+    string connName = buf;
+    TcpConnectionPtr connection = make_shared<TcpConnection>( loop_, connName, socketfd);
+    connection->Init();
+    connections_[connName] = connection;
     connection->set_messagecallback(messagecallback_);
     connection->set_connectioncallback(connectioncallback_);
     connection->set_writecompletecallback(writecompletecallback_);
     connection->set_highwatermarkcallback(highwatermarkcallback_, highwatermark_);
-    connection->OnConnectEstablished();
+    connection->set_closecallback(
+        std::bind(&TcpServer::RemoveConnection, this, std::placeholders::_1)); // FIXME: unsafe
+    loop_->RunInLoop(std::bind(&TcpConnection::OnConnectEstablished, connection));
+}
+
+void TcpServer::RemoveConnection(const TcpConnectionPtr& conn)
+{
+    // FIXME: unsafe
+    loop_->RunInLoop(std::bind(&TcpServer::RemoveConnectionInLoop, this, conn));
+}
+
+void TcpServer::RemoveConnectionInLoop(const TcpConnectionPtr& conn)
+{
+    loop_->AssertInLoopThread();
+    cout << "TcpServer::removeConnectionInLoop ["
+        << "] - connection " << conn->get_name();
+    size_t n = connections_.erase(conn->get_name());
+    (void)n;
+    assert(n == 1);
+    EventLoop* ioLoop = conn->get_loop();
+    ioLoop->QueueInLoop(
+        std::bind(&TcpConnection::ConnectDestroyed, conn));
 }
 
 void TcpServer::Start()

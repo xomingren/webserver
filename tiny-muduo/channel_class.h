@@ -1,23 +1,26 @@
 #pragma once
 
+#include <memory>
+
 #include "define.h"
+#include "noncopyable_class.h"
 
 //this class relate combine socketfd and its callbackfunction
 //use update to relate socketfd and epollfd
-class Channel
+class Channel : noncopyable
 {
 public:
 	Channel(EventLoop* loop,FD socketfd);
-	Channel(const Channel&) = delete;
-	Channel& operator =(const Channel&) = delete;
-	~Channel() = default;
+	~Channel();
 
-	void set_readcallbackfunc(EventCallback cb)
-	{ readcallbackfunc_ = std::move(cb); }
+	void set_readcallback(ReadEventCallback cb)
+	{ readcallback_ = std::move(cb); }
 
-	void set_writecallbackfunc(EventCallback cb)
-	{ writecallbackfunc_ = std::move(cb); }
+	void set_writecallback(EventCallback cb)
+	{ writecallback_ = std::move(cb); }
 
+	void set_closecallback(EventCallback cb)
+	{ closecallback_ = std::move(cb); }
 	//void set_writewritecompletefunc(Functor cb)
 	//{ writecompletecallbackfunc_ = std::move(cb); }
 
@@ -28,32 +31,54 @@ public:
 	{ return epollstatus_; }
 
 	void set_revent(uint32_t revent)//events happening now
-	{ revent_ = revent; }
+	{ revents_ = revent; }
 
 	uint32_t get_event() const
-	{ return event_; }
+	{ return events_; }
 
 	SocketFD get_FD() const
 	{ return FD_; }
 
+	bool IsNoneEvent() const
+	{ return events_ == kNoneEvent; }
+
 	void EnableRead();
 	void EnableWrite();
 	void DisableWrite();
+	void DisableAll() 
+	{  events_ = kNoneEvent; Update();  }
 	bool IsWriting();
-	void HandleEvent();
+	void HandleEvent(Timestamp receivetime);
+	
+	void Tie(const std::shared_ptr<void>& obj);
+	EventLoop* OwnerLoop() 
+	{ return loop_; }
+	void Remove();
 
 private:
 	void Update();//update my sockedfd to epfd
+	void HandleEventWithGuard(Timestamp receivetime);
 
-	FD FD_;//sockfd,timefd
 	EpollStatus epollstatus_;
-	uint32_t event_;
-	uint32_t revent_;
-	
-	EventCallback readcallbackfunc_;
-	EventCallback writecallbackfunc_;
-	//Functor writecompletecallbackfunc_;
+
+	static const int kNoneEvent;
+	static const int kReadEvent;
+	static const int kWriteEvent;
+
 	EventLoop* loop_;
+	const FD FD_;//sockfd,timefd
+	int events_;
+	int revents_;
+	
+	
+	std::weak_ptr<void> tie_;
+	bool tied_;
+	bool eventhandling_;
+	bool addedtoloop_;
+	ReadEventCallback readcallback_;
+	EventCallback writecallback_;
+	EventCallback closecallback_;
+	//Functor writecompletecallbackfunc_;	
 };
 
 

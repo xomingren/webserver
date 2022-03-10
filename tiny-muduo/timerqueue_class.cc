@@ -84,7 +84,7 @@ TimerQueue::TimerQueue(EventLoop* loop)
     timers_(),
     callingexpiredtimers_(false)
 {
-    timerfdchannel_.set_readcallbackfunc(
+    timerfdchannel_.set_readcallback(
         std::bind(&TimerQueue::HandleRead, this));
     // we are always reading the timerfd, we disarm it with timerfd_settime.
     timerfdchannel_.EnableRead();

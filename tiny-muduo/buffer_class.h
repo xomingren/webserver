@@ -2,10 +2,12 @@
 
 #include <assert.h>
 
+#include <string>
 #include <vector>
 
 #include "define.h"
 
+//all write/read operation to buffer and IO,should be done in IO thread,not in workers in threadpool but before it
 class Buffer
 {
 public:
@@ -31,6 +33,13 @@ public:
     const char* Peek() const
     { return Begin() + readerindex_; }
 
+    const char* findCRLF() const
+    {  
+        // FIXME: replace with memmem()?
+        const char* crlf = std::search(Peek(), BeginWrite(), kCRLF, kCRLF + 2);
+        return crlf == BeginWrite() ? NULL : crlf;
+    }
+
     size_t ReadableBytes() const
     { return writerindex_ - readerindex_; }
 
@@ -51,6 +60,13 @@ public:
         {
             RetrieveAll();
         }
+    }
+
+    void RetrieveUntil(const char* end)
+    {
+        assert(Peek() <= end);
+        assert(end <= BeginWrite());
+        Retrieve(end - Peek());
     }
 
     void RetrieveAll()
@@ -81,7 +97,10 @@ public:
     }
 
     char* BeginWrite()
-    { return Begin() + writerindex_; }
+    {  return Begin() + writerindex_; }
+
+    const char* BeginWrite() const
+    {  return Begin() + writerindex_;  }
 
     void HasWritten(size_t len)
     {

@@ -3,8 +3,9 @@
 #include <bits/stdint-uintn.h>//for uint
 
 #include <functional>//for function
-#include <string>
+#include <memory>
 
+#include "timestamp_class.h"
 
 //forward declear
 class TcpConnection;
@@ -14,14 +15,18 @@ class Buffer;
 
 using SocketFD = int;
 using FD = int;
+
+using TcpConnectionPtr = std::shared_ptr<TcpConnection>;
 using EventCallback = std::function<void()>;
+using ReadEventCallback = std::function<void(Timestamp)>;
 using NewConnectionCallback = std::function<void(FD sockfd)>;
-using MessageCallBack = std::function<void(TcpConnection* connection, Buffer* buf)>;
-using ConnectionCallBack = std::function<void(TcpConnection* connection)>;
-using WriteCompleteCallback = std::function<void(TcpConnection* connection)>;
-using HighWaterMarkCallback = std::function<void(TcpConnection*, size_t)>;
+using MessageCallBack = std::function<void(const TcpConnectionPtr&, Buffer*,Timestamp)>;
+using ConnectionCallBack = std::function<void(const TcpConnectionPtr&)>;
+using WriteCompleteCallback = std::function<void(const TcpConnectionPtr&)>;
+using HighWaterMarkCallback = std::function<void(const TcpConnectionPtr&, size_t)>;
 using Functor = std::function<void()>;
 using TimerCallback = std::function<void()>;
+using CloseCallback = std::function<void(const TcpConnectionPtr&)>;
 
 static const uint8_t kTmpBufferLength = 100;
 static const uint16_t kMaxEvents = 500;
