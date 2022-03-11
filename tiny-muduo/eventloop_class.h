@@ -47,6 +47,7 @@ public:
 
     bool HasChannel(Channel* channel);
     void RemoveChannel(Channel* channel);
+    void Quit();
 
     // timers
 
@@ -77,6 +78,7 @@ private:
 
     const pid_t threadId_;
     bool quit_;
+    bool eventhandling_; /* atomic */
     Epoll* poller_;
     Timestamp pollreturntime_;
     FD wakeupfd_;

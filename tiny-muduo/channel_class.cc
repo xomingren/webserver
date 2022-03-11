@@ -29,7 +29,7 @@ Channel::Channel(EventLoop* loop,FD socketfd)
 Channel::~Channel()
 {
 	assert(!eventhandling_);
-	assert(!addedtoloop_);
+	//assert(!addedtoloop_);
 	if (loop_->IsInLoopThread())
 	{
 		assert(!loop_->HasChannel(this));

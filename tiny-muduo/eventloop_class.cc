@@ -14,6 +14,7 @@ using namespace std;
 EventLoop::EventLoop()
   :  threadId_(CurrentThread::Tid()),//fixme,
      quit_(false),
+     eventhandling_(false),
 	 poller_(new Epoll()),
      wakeupfd_(CreateEventFd()),
      wakeupchannel_(new Channel(this, wakeupfd_)),
@@ -25,8 +26,8 @@ EventLoop::EventLoop()
 
 EventLoop::~EventLoop()
 {
-    //wakeupchannel_->disableAll();
-    //wakeupchannel_->remove();
+    wakeupchannel_->DisableAll();
+    wakeupchannel_->Remove();
     ::close(wakeupfd_);
     //t_loopInThisThread = NULL;
 }
@@ -39,6 +40,7 @@ void EventLoop::Loop()
         vector<Channel*> channels;
         pollreturntime_ = poller_->Poll(&channels);
 
+        eventhandling_ = true;
         for (const auto& it : channels)
         {
             //choose different callback
@@ -47,6 +49,7 @@ void EventLoop::Loop()
             //  2.1  if epoll_out triggered,use HandleWrite()
             it->HandleEvent(pollreturntime_);
         }
+        eventhandling_ = false;
         DoPendingFunctors();
     }
 }
@@ -151,17 +154,28 @@ bool EventLoop::HasChannel(Channel* channel)
     assert(channel->OwnerLoop() == this);
     AssertInLoopThread();
     //return poller_->hasChannel(channel); //fixme
-    return true;
+    return false;
 }
 
 void EventLoop::RemoveChannel(Channel* channel)
 {
-    /*assert(channel->ownerLoop() == this);
+    assert(channel->OwnerLoop() == this);
     AssertInLoopThread();
     if (eventhandling_)
     {
-        assert(currentActiveChannel_ == channel ||
-            std::find(activeChannels_.begin(), activeChannels_.end(), channel) == activeChannels_.end());
+        //assert(currentActiveChannel_ == channel || std::find(activeChannels_.begin(), activeChannels_.end(), channel) == activeChannels_.end());
     }
-    poller_->removeChannel(channel);*/
+    //poller_->RemoveChannel(channel);
+}
+
+void EventLoop::Quit()
+{
+    quit_ = true;
+    // There is a chance that loop() just executes while(!quit_) and exits,
+    // then EventLoop destructs, then we are accessing an invalid object.
+    // Can be fixed using mutex_ in both places.
+    if (!IsInLoopThread())
+    {
+        Wakeup();
+    }
 }

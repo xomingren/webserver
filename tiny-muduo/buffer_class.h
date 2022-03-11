@@ -108,6 +108,14 @@ public:
         writerindex_ += len;
     }
 
+    void Prepend(const void* /*restrict*/ data, size_t len)
+    {
+        assert(len <= PrependableBytes());
+        readerindex_ -= len;
+        const char* d = static_cast<const char*>(data);
+        std::copy(d, d + len, Begin() + readerindex_);
+    }
+
     void MakeSpace(size_t len)
     {
         if (WritableBytes() + PrependableBytes() < len + kCheapPrepend)
