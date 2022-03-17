@@ -139,7 +139,7 @@ void Connector::connecting(int sockfd)
   setState(kConnecting);
   assert(!channel_);
   channel_.reset(new Channel(loop_, sockfd));
-  channel_->set_readcallback(
+  channel_->set_writecallback(
       std::bind(&Connector::handleWrite, this)); // FIXME: unsafe
 
   // channel_->tie(shared_from_this()); is not working,

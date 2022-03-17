@@ -183,10 +183,34 @@ class Query final :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kQuestionerFieldNumber = 2,
     kQuestionFieldNumber = 3,
+    kQuestionerFieldNumber = 2,
     kIdFieldNumber = 1,
   };
+  // repeated string question = 3;
+  int question_size() const;
+  private:
+  int _internal_question_size() const;
+  public:
+  void clear_question();
+  const std::string& question(int index) const;
+  std::string* mutable_question(int index);
+  void set_question(int index, const std::string& value);
+  void set_question(int index, std::string&& value);
+  void set_question(int index, const char* value);
+  void set_question(int index, const char* value, size_t size);
+  std::string* add_question();
+  void add_question(const std::string& value);
+  void add_question(std::string&& value);
+  void add_question(const char* value);
+  void add_question(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& question() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_question();
+  private:
+  const std::string& _internal_question(int index) const;
+  std::string* _internal_add_question();
+  public:
+
   // string questioner = 2;
   void clear_questioner();
   const std::string& questioner() const;
@@ -199,20 +223,6 @@ class Query final :
   const std::string& _internal_questioner() const;
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_questioner(const std::string& value);
   std::string* _internal_mutable_questioner();
-  public:
-
-  // string question = 3;
-  void clear_question();
-  const std::string& question() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_question(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_question();
-  PROTOBUF_NODISCARD std::string* release_question();
-  void set_allocated_question(std::string* question);
-  private:
-  const std::string& _internal_question() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_question(const std::string& value);
-  std::string* _internal_mutable_question();
   public:
 
   // int64 id = 1;
@@ -231,8 +241,8 @@ class Query final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> question_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr questioner_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr question_;
   int64_t id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_query_2eproto;
@@ -358,11 +368,35 @@ class Answer final :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kSolutionFieldNumber = 4,
     kQuestionerFieldNumber = 2,
     kAnswererFieldNumber = 3,
-    kSolutionFieldNumber = 4,
     kIdFieldNumber = 1,
   };
+  // repeated string solution = 4;
+  int solution_size() const;
+  private:
+  int _internal_solution_size() const;
+  public:
+  void clear_solution();
+  const std::string& solution(int index) const;
+  std::string* mutable_solution(int index);
+  void set_solution(int index, const std::string& value);
+  void set_solution(int index, std::string&& value);
+  void set_solution(int index, const char* value);
+  void set_solution(int index, const char* value, size_t size);
+  std::string* add_solution();
+  void add_solution(const std::string& value);
+  void add_solution(std::string&& value);
+  void add_solution(const char* value);
+  void add_solution(const char* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& solution() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_solution();
+  private:
+  const std::string& _internal_solution(int index) const;
+  std::string* _internal_add_solution();
+  public:
+
   // string questioner = 2;
   void clear_questioner();
   const std::string& questioner() const;
@@ -391,20 +425,6 @@ class Answer final :
   std::string* _internal_mutable_answerer();
   public:
 
-  // string solution = 4;
-  void clear_solution();
-  const std::string& solution() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_solution(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_solution();
-  PROTOBUF_NODISCARD std::string* release_solution();
-  void set_allocated_solution(std::string* solution);
-  private:
-  const std::string& _internal_solution() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_solution(const std::string& value);
-  std::string* _internal_mutable_solution();
-  public:
-
   // int64 id = 1;
   void clear_id();
   int64_t id() const;
@@ -421,9 +441,9 @@ class Answer final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> solution_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr questioner_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr answerer_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr solution_;
   int64_t id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_query_2eproto;
@@ -473,6 +493,11 @@ class Empty final :
   static const Empty& default_instance() {
     return *internal_default_instance();
   }
+  enum OptionCase {
+    kId = 1,
+    OPTION_NOT_SET = 0,
+  };
+
   static inline const Empty* internal_default_instance() {
     return reinterpret_cast<const Empty*>(
                &_Empty_default_instance_);
@@ -552,6 +577,10 @@ class Empty final :
     kIdFieldNumber = 1,
   };
   // int32 id = 1;
+  bool has_id() const;
+  private:
+  bool _internal_has_id() const;
+  public:
   void clear_id();
   int32_t id() const;
   void set_id(int32_t value);
@@ -560,15 +589,27 @@ class Empty final :
   void _internal_set_id(int32_t value);
   public:
 
+  void clear_option();
+  OptionCase option_case() const;
   // @@protoc_insertion_point(class_scope:tiny_muduo.Empty)
  private:
   class _Internal;
+  void set_has_id();
+
+  inline bool has_option() const;
+  inline void clear_has_option();
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  int32_t id_;
+  union OptionUnion {
+    constexpr OptionUnion() : _constinit_{} {}
+      ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized _constinit_;
+    int32_t id_;
+  } option_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  uint32_t _oneof_case_[1];
+
   friend struct ::TableStruct_query_2eproto;
 };
 // ===================================================================
@@ -652,54 +693,79 @@ inline void Query::set_allocated_questioner(std::string* questioner) {
   // @@protoc_insertion_point(field_set_allocated:tiny_muduo.Query.questioner)
 }
 
-// string question = 3;
+// repeated string question = 3;
+inline int Query::_internal_question_size() const {
+  return question_.size();
+}
+inline int Query::question_size() const {
+  return _internal_question_size();
+}
 inline void Query::clear_question() {
-  question_.ClearToEmpty();
+  question_.Clear();
 }
-inline const std::string& Query::question() const {
-  // @@protoc_insertion_point(field_get:tiny_muduo.Query.question)
-  return _internal_question();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void Query::set_question(ArgT0&& arg0, ArgT... args) {
- 
- question_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:tiny_muduo.Query.question)
-}
-inline std::string* Query::mutable_question() {
-  std::string* _s = _internal_mutable_question();
-  // @@protoc_insertion_point(field_mutable:tiny_muduo.Query.question)
+inline std::string* Query::add_question() {
+  std::string* _s = _internal_add_question();
+  // @@protoc_insertion_point(field_add_mutable:tiny_muduo.Query.question)
   return _s;
 }
-inline const std::string& Query::_internal_question() const {
-  return question_.Get();
+inline const std::string& Query::_internal_question(int index) const {
+  return question_.Get(index);
 }
-inline void Query::_internal_set_question(const std::string& value) {
-  
-  question_.Set(value, GetArenaForAllocation());
+inline const std::string& Query::question(int index) const {
+  // @@protoc_insertion_point(field_get:tiny_muduo.Query.question)
+  return _internal_question(index);
 }
-inline std::string* Query::_internal_mutable_question() {
-  
-  return question_.Mutable(GetArenaForAllocation());
+inline std::string* Query::mutable_question(int index) {
+  // @@protoc_insertion_point(field_mutable:tiny_muduo.Query.question)
+  return question_.Mutable(index);
 }
-inline std::string* Query::release_question() {
-  // @@protoc_insertion_point(field_release:tiny_muduo.Query.question)
-  return question_.Release();
+inline void Query::set_question(int index, const std::string& value) {
+  question_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:tiny_muduo.Query.question)
 }
-inline void Query::set_allocated_question(std::string* question) {
-  if (question != nullptr) {
-    
-  } else {
-    
-  }
-  question_.SetAllocated(question, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (question_.IsDefault()) {
-    question_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:tiny_muduo.Query.question)
+inline void Query::set_question(int index, std::string&& value) {
+  question_.Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:tiny_muduo.Query.question)
+}
+inline void Query::set_question(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  question_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:tiny_muduo.Query.question)
+}
+inline void Query::set_question(int index, const char* value, size_t size) {
+  question_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:tiny_muduo.Query.question)
+}
+inline std::string* Query::_internal_add_question() {
+  return question_.Add();
+}
+inline void Query::add_question(const std::string& value) {
+  question_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:tiny_muduo.Query.question)
+}
+inline void Query::add_question(std::string&& value) {
+  question_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:tiny_muduo.Query.question)
+}
+inline void Query::add_question(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  question_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:tiny_muduo.Query.question)
+}
+inline void Query::add_question(const char* value, size_t size) {
+  question_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:tiny_muduo.Query.question)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+Query::question() const {
+  // @@protoc_insertion_point(field_list:tiny_muduo.Query.question)
+  return question_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+Query::mutable_question() {
+  // @@protoc_insertion_point(field_mutable_list:tiny_muduo.Query.question)
+  return &question_;
 }
 
 // -------------------------------------------------------------------
@@ -826,54 +892,79 @@ inline void Answer::set_allocated_answerer(std::string* answerer) {
   // @@protoc_insertion_point(field_set_allocated:tiny_muduo.Answer.answerer)
 }
 
-// string solution = 4;
+// repeated string solution = 4;
+inline int Answer::_internal_solution_size() const {
+  return solution_.size();
+}
+inline int Answer::solution_size() const {
+  return _internal_solution_size();
+}
 inline void Answer::clear_solution() {
-  solution_.ClearToEmpty();
+  solution_.Clear();
 }
-inline const std::string& Answer::solution() const {
-  // @@protoc_insertion_point(field_get:tiny_muduo.Answer.solution)
-  return _internal_solution();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void Answer::set_solution(ArgT0&& arg0, ArgT... args) {
- 
- solution_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:tiny_muduo.Answer.solution)
-}
-inline std::string* Answer::mutable_solution() {
-  std::string* _s = _internal_mutable_solution();
-  // @@protoc_insertion_point(field_mutable:tiny_muduo.Answer.solution)
+inline std::string* Answer::add_solution() {
+  std::string* _s = _internal_add_solution();
+  // @@protoc_insertion_point(field_add_mutable:tiny_muduo.Answer.solution)
   return _s;
 }
-inline const std::string& Answer::_internal_solution() const {
-  return solution_.Get();
+inline const std::string& Answer::_internal_solution(int index) const {
+  return solution_.Get(index);
 }
-inline void Answer::_internal_set_solution(const std::string& value) {
-  
-  solution_.Set(value, GetArenaForAllocation());
+inline const std::string& Answer::solution(int index) const {
+  // @@protoc_insertion_point(field_get:tiny_muduo.Answer.solution)
+  return _internal_solution(index);
 }
-inline std::string* Answer::_internal_mutable_solution() {
-  
-  return solution_.Mutable(GetArenaForAllocation());
+inline std::string* Answer::mutable_solution(int index) {
+  // @@protoc_insertion_point(field_mutable:tiny_muduo.Answer.solution)
+  return solution_.Mutable(index);
 }
-inline std::string* Answer::release_solution() {
-  // @@protoc_insertion_point(field_release:tiny_muduo.Answer.solution)
-  return solution_.Release();
+inline void Answer::set_solution(int index, const std::string& value) {
+  solution_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set:tiny_muduo.Answer.solution)
 }
-inline void Answer::set_allocated_solution(std::string* solution) {
-  if (solution != nullptr) {
-    
-  } else {
-    
-  }
-  solution_.SetAllocated(solution, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (solution_.IsDefault()) {
-    solution_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:tiny_muduo.Answer.solution)
+inline void Answer::set_solution(int index, std::string&& value) {
+  solution_.Mutable(index)->assign(std::move(value));
+  // @@protoc_insertion_point(field_set:tiny_muduo.Answer.solution)
+}
+inline void Answer::set_solution(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  solution_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:tiny_muduo.Answer.solution)
+}
+inline void Answer::set_solution(int index, const char* value, size_t size) {
+  solution_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:tiny_muduo.Answer.solution)
+}
+inline std::string* Answer::_internal_add_solution() {
+  return solution_.Add();
+}
+inline void Answer::add_solution(const std::string& value) {
+  solution_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:tiny_muduo.Answer.solution)
+}
+inline void Answer::add_solution(std::string&& value) {
+  solution_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:tiny_muduo.Answer.solution)
+}
+inline void Answer::add_solution(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  solution_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:tiny_muduo.Answer.solution)
+}
+inline void Answer::add_solution(const char* value, size_t size) {
+  solution_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:tiny_muduo.Answer.solution)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+Answer::solution() const {
+  // @@protoc_insertion_point(field_list:tiny_muduo.Answer.solution)
+  return solution_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+Answer::mutable_solution() {
+  // @@protoc_insertion_point(field_mutable_list:tiny_muduo.Answer.solution)
+  return &solution_;
 }
 
 // -------------------------------------------------------------------
@@ -881,25 +972,52 @@ inline void Answer::set_allocated_solution(std::string* solution) {
 // Empty
 
 // int32 id = 1;
+inline bool Empty::_internal_has_id() const {
+  return option_case() == kId;
+}
+inline bool Empty::has_id() const {
+  return _internal_has_id();
+}
+inline void Empty::set_has_id() {
+  _oneof_case_[0] = kId;
+}
 inline void Empty::clear_id() {
-  id_ = 0;
+  if (_internal_has_id()) {
+    option_.id_ = 0;
+    clear_has_option();
+  }
 }
 inline int32_t Empty::_internal_id() const {
-  return id_;
+  if (_internal_has_id()) {
+    return option_.id_;
+  }
+  return 0;
+}
+inline void Empty::_internal_set_id(int32_t value) {
+  if (!_internal_has_id()) {
+    clear_option();
+    set_has_id();
+  }
+  option_.id_ = value;
 }
 inline int32_t Empty::id() const {
   // @@protoc_insertion_point(field_get:tiny_muduo.Empty.id)
   return _internal_id();
-}
-inline void Empty::_internal_set_id(int32_t value) {
-  
-  id_ = value;
 }
 inline void Empty::set_id(int32_t value) {
   _internal_set_id(value);
   // @@protoc_insertion_point(field_set:tiny_muduo.Empty.id)
 }
 
+inline bool Empty::has_option() const {
+  return option_case() != OPTION_NOT_SET;
+}
+inline void Empty::clear_has_option() {
+  _oneof_case_[0] = OPTION_NOT_SET;
+}
+inline Empty::OptionCase Empty::option_case() const {
+  return Empty::OptionCase(_oneof_case_[0]);
+}
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__

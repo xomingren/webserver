@@ -25,7 +25,7 @@ using CloseCallback = std::function<void(const TcpConnectionPtr&)>;
 void DefaultConnectionCallback(const TcpConnectionPtr& conn);
 void DefaultMessageCallback(const TcpConnectionPtr& conn,
 	Buffer* buffer,
-	Timestamp receiveTime);
+	Timestamp receivetime);
 
 enum class EpollStatus:char
 {

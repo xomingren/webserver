@@ -26,6 +26,7 @@ public:
 	{ writecompletecallback_ = std::move(cb); }
 	void set_highwatermarkcallback(HighWaterMarkCallback cb, size_t highwatermark)
 	{ highwatermarkcallback_ = cb; highwatermark_ = highwatermark; }
+
 	void Start();
 	void OnNewConnection(SocketFD socketfd);
 

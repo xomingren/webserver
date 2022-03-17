@@ -1,5 +1,6 @@
 #pragma once
 
+#include <any>
 #include <atomic>
 #include <memory>//for enbale_shared_from_this
 #include <string_view>
@@ -50,7 +51,8 @@ public:
 	{ writecompletecallback_ = std::move(cb); }
 	void set_highwatermarkcallback(HighWaterMarkCallback cb, size_t highWaterMark)
 	{ highwatermarkcallback_ = cb; highwatermark_ = highWaterMark; }
-
+	void set_context_(const std::any& context)
+	{ context_ = context; }
 	void Init();
 
 	/// Internal use only.
@@ -84,5 +86,6 @@ private:
 	WriteCompleteCallback writecompletecallback_;//called when outbuf_ is empty
 	HighWaterMarkCallback highwatermarkcallback_;//called when wrote too many
 	CloseCallback closecallback_;
+	std::any context_;
 };
 

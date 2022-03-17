@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package rpc_example;
+
+option cc_generic_services = true;
+
+message RpcRequest {
+  string callwhat = 1;
+  int32 howmanyparams = 2;
+  repeated int32 params = 3;
+}
+
+message RpcResponse {
+  oneof optional_solved{ bool solved = 1;}
+  oneof optional_result{ int32 result = 2;}
+}
+
+service RpcService {
+  rpc Solve (RpcRequest) returns (RpcResponse);
+}
+

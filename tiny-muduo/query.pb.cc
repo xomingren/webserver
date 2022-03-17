@@ -23,8 +23,8 @@ namespace _pbi = _pb::internal;
 namespace tiny_muduo {
 PROTOBUF_CONSTEXPR Query::Query(
     ::_pbi::ConstantInitialized)
-  : questioner_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , question_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  : question_()
+  , questioner_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , id_(int64_t{0}){}
 struct QueryDefaultTypeInternal {
   PROTOBUF_CONSTEXPR QueryDefaultTypeInternal()
@@ -37,9 +37,9 @@ struct QueryDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 QueryDefaultTypeInternal _Query_default_instance_;
 PROTOBUF_CONSTEXPR Answer::Answer(
     ::_pbi::ConstantInitialized)
-  : questioner_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
+  : solution_()
+  , questioner_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , answerer_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
-  , solution_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , id_(int64_t{0}){}
 struct AnswerDefaultTypeInternal {
   PROTOBUF_CONSTEXPR AnswerDefaultTypeInternal()
@@ -52,7 +52,7 @@ struct AnswerDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AnswerDefaultTypeInternal _Answer_default_instance_;
 PROTOBUF_CONSTEXPR Empty::Empty(
     ::_pbi::ConstantInitialized)
-  : id_(0){}
+  : _oneof_case_{}{}
 struct EmptyDefaultTypeInternal {
   PROTOBUF_CONSTEXPR EmptyDefaultTypeInternal()
       : _instance(::_pbi::ConstantInitialized{}) {}
@@ -90,10 +90,11 @@ const uint32_t TableStruct_query_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(pr
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::tiny_muduo::Empty, _internal_metadata_),
   ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
+  PROTOBUF_FIELD_OFFSET(::tiny_muduo::Empty, _oneof_case_[0]),
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::tiny_muduo::Empty, id_),
+  ::_pbi::kInvalidFieldOffsetTag,
+  PROTOBUF_FIELD_OFFSET(::tiny_muduo::Empty, option_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::tiny_muduo::Query)},
@@ -110,13 +111,14 @@ static const ::_pb::Message* const file_default_instances[] = {
 const char descriptor_table_protodef_query_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\013query.proto\022\ntiny_muduo\"9\n\005Query\022\n\n\002id"
   "\030\001 \001(\003\022\022\n\nquestioner\030\002 \001(\t\022\020\n\010question\030\003"
-  " \001(\t\"L\n\006Answer\022\n\n\002id\030\001 \001(\003\022\022\n\nquestioner"
-  "\030\002 \001(\t\022\020\n\010answerer\030\003 \001(\t\022\020\n\010solution\030\004 \001"
-  "(\t\"\023\n\005Empty\022\n\n\002id\030\001 \001(\005b\006proto3"
+  " \003(\t\"L\n\006Answer\022\n\n\002id\030\001 \001(\003\022\022\n\nquestioner"
+  "\030\002 \001(\t\022\020\n\010answerer\030\003 \001(\t\022\020\n\010solution\030\004 \003"
+  "(\t\"\037\n\005Empty\022\014\n\002id\030\001 \001(\005H\000B\010\n\006optionb\006pro"
+  "to3"
   ;
 static ::_pbi::once_flag descriptor_table_query_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_query_2eproto = {
-    false, false, 191, descriptor_table_protodef_query_2eproto,
+    false, false, 203, descriptor_table_protodef_query_2eproto,
     "query.proto",
     &descriptor_table_query_2eproto_once, nullptr, 0, 3,
     schemas, file_default_instances, TableStruct_query_2eproto::offsets,
@@ -139,12 +141,14 @@ class Query::_Internal {
 
 Query::Query(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
+  question_(arena) {
   SharedCtor();
   // @@protoc_insertion_point(arena_constructor:tiny_muduo.Query)
 }
 Query::Query(const Query& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      question_(from.question_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   questioner_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -152,14 +156,6 @@ Query::Query(const Query& from)
   #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_questioner().empty()) {
     questioner_.Set(from._internal_questioner(), 
-      GetArenaForAllocation());
-  }
-  question_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    question_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_question().empty()) {
-    question_.Set(from._internal_question(), 
       GetArenaForAllocation());
   }
   id_ = from.id_;
@@ -170,10 +166,6 @@ inline void Query::SharedCtor() {
 questioner_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   questioner_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-question_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  question_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 id_ = int64_t{0};
 }
@@ -190,7 +182,6 @@ Query::~Query() {
 inline void Query::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   questioner_.Destroy();
-  question_.Destroy();
 }
 
 void Query::SetCachedSize(int size) const {
@@ -203,8 +194,8 @@ void Query::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  question_.Clear();
   questioner_.ClearToEmpty();
-  question_.ClearToEmpty();
   id_ = int64_t{0};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -233,13 +224,18 @@ const char* Query::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
         } else
           goto handle_unusual;
         continue;
-      // string question = 3;
+      // repeated string question = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
-          auto str = _internal_mutable_question();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "tiny_muduo.Query.question"));
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_question();
+            ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+            CHK_(ptr);
+            CHK_(::_pbi::VerifyUTF8(str, "tiny_muduo.Query.question"));
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -288,14 +284,14 @@ uint8_t* Query::_InternalSerialize(
         2, this->_internal_questioner(), target);
   }
 
-  // string question = 3;
-  if (!this->_internal_question().empty()) {
+  // repeated string question = 3;
+  for (int i = 0, n = this->_internal_question_size(); i < n; i++) {
+    const auto& s = this->_internal_question(i);
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_question().data(), static_cast<int>(this->_internal_question().length()),
+      s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "tiny_muduo.Query.question");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_question(), target);
+    target = stream->WriteString(3, s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -314,18 +310,19 @@ size_t Query::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  // repeated string question = 3;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(question_.size());
+  for (int i = 0, n = question_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      question_.Get(i));
+  }
+
   // string questioner = 2;
   if (!this->_internal_questioner().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_questioner());
-  }
-
-  // string question = 3;
-  if (!this->_internal_question().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_question());
   }
 
   // int64 id = 1;
@@ -355,11 +352,9 @@ void Query::MergeFrom(const Query& from) {
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  question_.MergeFrom(from.question_);
   if (!from._internal_questioner().empty()) {
     _internal_set_questioner(from._internal_questioner());
-  }
-  if (!from._internal_question().empty()) {
-    _internal_set_question(from._internal_question());
   }
   if (from._internal_id() != 0) {
     _internal_set_id(from._internal_id());
@@ -383,13 +378,10 @@ void Query::InternalSwap(Query* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  question_.InternalSwap(&other->question_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &questioner_, lhs_arena,
       &other->questioner_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &question_, lhs_arena,
-      &other->question_, rhs_arena
   );
   swap(id_, other->id_);
 }
@@ -408,12 +400,14 @@ class Answer::_Internal {
 
 Answer::Answer(::PROTOBUF_NAMESPACE_ID::Arena* arena,
                          bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned),
+  solution_(arena) {
   SharedCtor();
   // @@protoc_insertion_point(arena_constructor:tiny_muduo.Answer)
 }
 Answer::Answer(const Answer& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      solution_(from.solution_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   questioner_.InitDefault();
   #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
@@ -431,14 +425,6 @@ Answer::Answer(const Answer& from)
     answerer_.Set(from._internal_answerer(), 
       GetArenaForAllocation());
   }
-  solution_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    solution_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_solution().empty()) {
-    solution_.Set(from._internal_solution(), 
-      GetArenaForAllocation());
-  }
   id_ = from.id_;
   // @@protoc_insertion_point(copy_constructor:tiny_muduo.Answer)
 }
@@ -451,10 +437,6 @@ questioner_.InitDefault();
 answerer_.InitDefault();
 #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
   answerer_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-solution_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  solution_.Set("", GetArenaForAllocation());
 #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 id_ = int64_t{0};
 }
@@ -472,7 +454,6 @@ inline void Answer::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
   questioner_.Destroy();
   answerer_.Destroy();
-  solution_.Destroy();
 }
 
 void Answer::SetCachedSize(int size) const {
@@ -485,9 +466,9 @@ void Answer::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  solution_.Clear();
   questioner_.ClearToEmpty();
   answerer_.ClearToEmpty();
-  solution_.ClearToEmpty();
   id_ = int64_t{0};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -526,13 +507,18 @@ const char* Answer::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
         } else
           goto handle_unusual;
         continue;
-      // string solution = 4;
+      // repeated string solution = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          auto str = _internal_mutable_solution();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "tiny_muduo.Answer.solution"));
+          ptr -= 1;
+          do {
+            ptr += 1;
+            auto str = _internal_add_solution();
+            ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
+            CHK_(ptr);
+            CHK_(::_pbi::VerifyUTF8(str, "tiny_muduo.Answer.solution"));
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<34>(ptr));
         } else
           goto handle_unusual;
         continue;
@@ -591,14 +577,14 @@ uint8_t* Answer::_InternalSerialize(
         3, this->_internal_answerer(), target);
   }
 
-  // string solution = 4;
-  if (!this->_internal_solution().empty()) {
+  // repeated string solution = 4;
+  for (int i = 0, n = this->_internal_solution_size(); i < n; i++) {
+    const auto& s = this->_internal_solution(i);
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_solution().data(), static_cast<int>(this->_internal_solution().length()),
+      s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "tiny_muduo.Answer.solution");
-    target = stream->WriteStringMaybeAliased(
-        4, this->_internal_solution(), target);
+    target = stream->WriteString(4, s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -617,6 +603,14 @@ size_t Answer::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  // repeated string solution = 4;
+  total_size += 1 *
+      ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(solution_.size());
+  for (int i = 0, n = solution_.size(); i < n; i++) {
+    total_size += ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+      solution_.Get(i));
+  }
+
   // string questioner = 2;
   if (!this->_internal_questioner().empty()) {
     total_size += 1 +
@@ -629,13 +623,6 @@ size_t Answer::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_answerer());
-  }
-
-  // string solution = 4;
-  if (!this->_internal_solution().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_solution());
   }
 
   // int64 id = 1;
@@ -665,14 +652,12 @@ void Answer::MergeFrom(const Answer& from) {
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  solution_.MergeFrom(from.solution_);
   if (!from._internal_questioner().empty()) {
     _internal_set_questioner(from._internal_questioner());
   }
   if (!from._internal_answerer().empty()) {
     _internal_set_answerer(from._internal_answerer());
-  }
-  if (!from._internal_solution().empty()) {
-    _internal_set_solution(from._internal_solution());
   }
   if (from._internal_id() != 0) {
     _internal_set_id(from._internal_id());
@@ -696,6 +681,7 @@ void Answer::InternalSwap(Answer* other) {
   auto* lhs_arena = GetArenaForAllocation();
   auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  solution_.InternalSwap(&other->solution_);
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &questioner_, lhs_arena,
       &other->questioner_, rhs_arena
@@ -703,10 +689,6 @@ void Answer::InternalSwap(Answer* other) {
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
       &answerer_, lhs_arena,
       &other->answerer_, rhs_arena
-  );
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &solution_, lhs_arena,
-      &other->solution_, rhs_arena
   );
   swap(id_, other->id_);
 }
@@ -732,12 +714,21 @@ Empty::Empty(::PROTOBUF_NAMESPACE_ID::Arena* arena,
 Empty::Empty(const Empty& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  id_ = from.id_;
+  clear_has_option();
+  switch (from.option_case()) {
+    case kId: {
+      _internal_set_id(from._internal_id());
+      break;
+    }
+    case OPTION_NOT_SET: {
+      break;
+    }
+  }
   // @@protoc_insertion_point(copy_constructor:tiny_muduo.Empty)
 }
 
 inline void Empty::SharedCtor() {
-id_ = 0;
+clear_has_option();
 }
 
 Empty::~Empty() {
@@ -751,11 +742,29 @@ Empty::~Empty() {
 
 inline void Empty::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (has_option()) {
+    clear_option();
+  }
 }
 
 void Empty::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
+
+void Empty::clear_option() {
+// @@protoc_insertion_point(one_of_clear_start:tiny_muduo.Empty)
+  switch (option_case()) {
+    case kId: {
+      // No need to clear
+      break;
+    }
+    case OPTION_NOT_SET: {
+      break;
+    }
+  }
+  _oneof_case_[0] = OPTION_NOT_SET;
+}
+
 
 void Empty::Clear() {
 // @@protoc_insertion_point(message_clear_start:tiny_muduo.Empty)
@@ -763,7 +772,7 @@ void Empty::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  id_ = 0;
+  clear_option();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -776,7 +785,7 @@ const char* Empty::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
       // int32 id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          _internal_set_id(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
           CHK_(ptr);
         } else
           goto handle_unusual;
@@ -811,7 +820,7 @@ uint8_t* Empty::_InternalSerialize(
   (void) cached_has_bits;
 
   // int32 id = 1;
-  if (this->_internal_id() != 0) {
+  if (_internal_has_id()) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteInt32ToArray(1, this->_internal_id(), target);
   }
@@ -832,11 +841,16 @@ size_t Empty::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // int32 id = 1;
-  if (this->_internal_id() != 0) {
-    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_id());
+  switch (option_case()) {
+    // int32 id = 1;
+    case kId: {
+      total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_id());
+      break;
+    }
+    case OPTION_NOT_SET: {
+      break;
+    }
   }
-
   return MaybeComputeUnknownFieldsSize(total_size, &_cached_size_);
 }
 
@@ -859,8 +873,14 @@ void Empty::MergeFrom(const Empty& from) {
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_id() != 0) {
-    _internal_set_id(from._internal_id());
+  switch (from.option_case()) {
+    case kId: {
+      _internal_set_id(from._internal_id());
+      break;
+    }
+    case OPTION_NOT_SET: {
+      break;
+    }
   }
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -879,7 +899,8 @@ bool Empty::IsInitialized() const {
 void Empty::InternalSwap(Empty* other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(id_, other->id_);
+  swap(option_, other->option_);
+  swap(_oneof_case_[0], other->_oneof_case_[0]);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Empty::GetMetadata() const {

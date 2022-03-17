@@ -63,8 +63,8 @@ private:
         answer.set_id(1);
         answer.set_questioner(message->questioner());
         answer.set_answerer("blog.csdn.net/Solstice");
-        answer.set_solution("Jump!");
-        answer.set_solution("Win!");
+        answer.set_solution(1,"Jump!");
+        answer.set_solution(2,"Win!");
         codec_.Send(conn, answer);
 
         conn->Shutdown();
@@ -83,12 +83,12 @@ private:
     ProtobufCodec codec_;
 };
 
-int main(int argc, char* argv[])
-{
-    /*LOG_INFO << "pid = " << getpid();*/
-    EventLoop loop; 
-    QueryServer server(&loop);
-    server.Start();
-    loop.Loop();
-    return 0;
-}
+//int main(int argc, char* argv[])
+//{
+//    /*LOG_INFO << "pid = " << getpid();*/
+//    EventLoop loop; 
+//    QueryServer server(&loop);
+//    server.Start();
+//    loop.Loop();
+//    return 0;
+//}
