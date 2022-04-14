@@ -51,7 +51,7 @@ public:
     {  
         // FIXME: replace with memmem()?
         const char* crlf = std::search(Peek(), BeginWrite(), kCRLF, kCRLF + 2);
-        return crlf == BeginWrite() ? NULL : crlf;
+        return crlf == BeginWrite() ? nullptr : crlf;
     }
 
     size_t ReadableBytes() const

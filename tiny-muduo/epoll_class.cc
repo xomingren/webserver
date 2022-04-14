@@ -6,6 +6,8 @@
 #include <iostream>//for cout
 #include <string.h>//for memset
 
+#include "channel_class.h"
+
 using namespace std;
 
 Epoll::Epoll()

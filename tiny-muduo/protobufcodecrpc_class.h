@@ -20,7 +20,7 @@ namespace google
     }
 }
 
-typedef std::shared_ptr<google::protobuf::Message> MessagePtr;
+using MessagePtr = std::shared_ptr<google::protobuf::Message>;
 
 // wire format
 //
@@ -50,57 +50,57 @@ class ProtobufCodecRpc : noncopyable
     };
 
     // return false to stop parsing protobuf message
-    typedef std::function<bool(const TcpConnectionPtr&,
+    using RawMessageCallback = std::function<bool(const TcpConnectionPtr&,
         std::string_view,
-        Timestamp)> RawMessageCallback;
+        Timestamp)> ;
 
-    typedef std::function<void(const TcpConnectionPtr&,
+    using ProtobufMessageCallback = std::function<void(const TcpConnectionPtr&,
         const MessagePtr&,
-        Timestamp)> ProtobufMessageCallback;
+        Timestamp)>;
 
-    typedef std::function<void(const TcpConnectionPtr&,
+    using ErrorCallback = std::function<void(const TcpConnectionPtr&,
         Buffer*,
         Timestamp,
-        ErrorCode)> ErrorCallback;
+        ErrorCode)>;
 
     ProtobufCodecRpc(const ::google::protobuf::Message* prototype,
-        std::string_view tagArg,
-        const ProtobufMessageCallback& messageCb,
-        const RawMessageCallback& rawCb = RawMessageCallback(),
-        const ErrorCallback& errorCb = defaultErrorCallback)
+                     std::string_view tag,
+                     const ProtobufMessageCallback& messagecb,
+                     const RawMessageCallback& rawcb = RawMessageCallback(),
+                     const ErrorCallback& errorcb = DefaultErrorCallback)
         : prototype_(prototype),
-          tag_(tagArg),
-          messageCallback_(messageCb),
-          rawCb_(rawCb),
-          errorCallback_(errorCb),
-          kMinMessageLen(static_cast<int>(tagArg.size() + kChecksumLen))
+          tag_(tag),
+          messagecallback_(messagecb),
+          rawcb_(rawcb),
+          errorcallback_(errorcb),
+          kMinMessageLen(static_cast<int>(tag.size() + kChecksumLen))
     {
     }
 
     virtual ~ProtobufCodecRpc() = default;
 
-    const std::string& tag() const { return tag_; }
+    const std::string& get_tag() const { return tag_; }
 
-    void send(const TcpConnectionPtr& conn,
+    void Send(const TcpConnectionPtr& conn,
         const ::google::protobuf::Message& message);
 
-    void onMessage(const TcpConnectionPtr& conn,
+    void OnMessage(const TcpConnectionPtr& conn,
         Buffer* buf,
-        Timestamp receiveTime);
+        Timestamp receivetime);
 
-    virtual bool parseFromBuffer(std::string_view buf, google::protobuf::Message* message);
-    virtual int serializeToBuffer(const google::protobuf::Message& message, Buffer* buf);
+    virtual bool ParseFromBuffer(std::string_view buf, google::protobuf::Message* message);
+    virtual int SerializeToBuffer(const google::protobuf::Message& message, Buffer* buf);
 
-    static const std::string& errorCodeToString(ErrorCode errorCode);
+    static const std::string& ErrorCodeToString(ErrorCode errorcode);
 
     // public for unit tests
-    ErrorCode parse(const char* buf, int len, ::google::protobuf::Message* message);
-    void fillEmptyBuffer(Buffer* buf, const google::protobuf::Message& message);
+    ErrorCode Parse(const char* buf, int len, ::google::protobuf::Message* message);
+    void FillEmptyBuffer(Buffer* buf, const google::protobuf::Message& message);
 
-    static int32_t checksum(const void* buf, int len);
-    static bool validateChecksum(const char* buf, int len);
-    static int32_t asInt32(const char* buf);
-    static void defaultErrorCallback(const TcpConnectionPtr&,
+    static int32_t Checksum(const void* buf, int len);
+    static bool ValidateChecksum(const char* buf, int len);
+    static int32_t AsInt32(const char* buf);
+    static void DefaultErrorCallback(const TcpConnectionPtr&,
         Buffer*,
         Timestamp,
         ErrorCode);
@@ -108,66 +108,65 @@ class ProtobufCodecRpc : noncopyable
     private:
     const ::google::protobuf::Message* prototype_;
     const std::string tag_;
-    ProtobufMessageCallback messageCallback_;
-    RawMessageCallback rawCb_;
-    ErrorCallback errorCallback_;
+    ProtobufMessageCallback messagecallback_;
+    RawMessageCallback rawcb_;
+    ErrorCallback errorcallback_;
     const int kMinMessageLen;
 };
 
 template<typename MSG, const char* TAG, typename CODEC = ProtobufCodecRpc>  // TAG must be a variable with external linkage, not a string literal
-
 class ProtobufCodecRpcT
 {
-    static_assert(std::is_base_of<ProtobufCodecRpc, CODEC>::value, "CODEC should be derived from ProtobufCodecLite");
+    static_assert(std::is_base_of<ProtobufCodecRpc, CODEC>::value, "CODEC should be derived from ProtobufCodecRpc");
     public:
-    typedef std::shared_ptr<MSG> ConcreteMessagePtr;
-    typedef std::function<void(const TcpConnectionPtr&,
-        const ConcreteMessagePtr&,
-        Timestamp)> ProtobufMessageCallback;
-    typedef ProtobufCodecRpc::RawMessageCallback RawMessageCallback;
-    typedef ProtobufCodecRpc::ErrorCallback ErrorCallback;
+    using ConcreteMessagePtr = std::shared_ptr<MSG> ;
+    using ProtobufMessageCallback = std::function<void(const TcpConnectionPtr&,
+                                                       const ConcreteMessagePtr&,
+                                                       Timestamp)> ;
+    using RawMessageCallback = ProtobufCodecRpc::RawMessageCallback;
+    using ErrorCallback = ProtobufCodecRpc::ErrorCallback;
 
-    explicit ProtobufCodecRpcT(const ProtobufMessageCallback& messageCb,
-        const RawMessageCallback& rawCb = RawMessageCallback(),
-        const ErrorCallback& errorCb = ProtobufCodecRpc::defaultErrorCallback)
-        : messageCallback_(messageCb),
-        codec_(&MSG::default_instance(),
-            TAG,
-            std::bind(&ProtobufCodecRpcT::onRpcMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-            rawCb,
-            errorCb)
+    explicit ProtobufCodecRpcT(const ProtobufMessageCallback& messagecb,
+                               const RawMessageCallback& rawcb = RawMessageCallback(),
+                               const ErrorCallback& errorcb = ProtobufCodecRpc::DefaultErrorCallback)
+        : messagecallback_(messagecb),
+          codec_(&MSG::default_instance(),
+                 TAG,
+                 std::bind(&ProtobufCodecRpcT::OnRpcMessage, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+                 rawcb,
+                 errorcb)
     {
     }
 
-    const std::string& tag() const { return codec_.tag(); }
+    const std::string& get_tag() const { return codec_.tag(); }
 
-    void send(const TcpConnectionPtr& conn,
+    void Send(const TcpConnectionPtr& conn,
         const MSG& message)
     {
-        codec_.send(conn, message);
+        codec_.Send(conn, message);
     }
 
-    void onMessage(const TcpConnectionPtr& conn,
+    void OnMessage(const TcpConnectionPtr& conn,
         Buffer* buf,
-        Timestamp receiveTime)
+        Timestamp receivetime)
     {
-        codec_.onMessage(conn, buf, receiveTime);
+        codec_.OnMessage(conn, buf, receivetime);
     }
 
     // internal
-    void onRpcMessage(const TcpConnectionPtr& conn,
+    void OnRpcMessage(const TcpConnectionPtr& conn,
         const MessagePtr& message,
-        Timestamp receiveTime)
+        Timestamp receivetime)
     {
-        messageCallback_(conn, down_pointer_cast<MSG>(message), receiveTime);
+        messagecallback_(conn, down_pointer_cast<MSG>(message), receivetime);
     }
 
-    void fillEmptyBuffer(Buffer* buf, const MSG& message)
+    void FillEmptyBuffer(Buffer* buf, const MSG& message)
     {
-        codec_.fillEmptyBuffer(buf, message);
+        codec_.FillEmptyBuffer(buf, message);
     }
 
     private:
-    ProtobufMessageCallback messageCallback_;
+    ProtobufMessageCallback messagecallback_;
     CODEC codec_;
 };

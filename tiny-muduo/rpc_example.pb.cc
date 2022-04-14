@@ -25,7 +25,6 @@ PROTOBUF_CONSTEXPR RpcRequest::RpcRequest(
     ::_pbi::ConstantInitialized)
   : params_()
   , _params_cached_byte_size_(0)
-  , callwhat_(&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{})
   , howmanyparams_(0){}
 struct RpcRequestDefaultTypeInternal {
   PROTOBUF_CONSTEXPR RpcRequestDefaultTypeInternal()
@@ -51,7 +50,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORIT
 }  // namespace rpc_example
 static ::_pb::Metadata file_level_metadata_rpc_5fexample_2eproto[2];
 static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_rpc_5fexample_2eproto = nullptr;
-static const ::_pb::ServiceDescriptor* file_level_service_descriptors_rpc_5fexample_2eproto[1];
+static const ::_pb::ServiceDescriptor* file_level_service_descriptors_rpc_5fexample_2eproto[2];
 
 const uint32_t TableStruct_rpc_5fexample_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
@@ -60,7 +59,6 @@ const uint32_t TableStruct_rpc_5fexample_2eproto::offsets[] PROTOBUF_SECTION_VAR
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::rpc_example::RpcRequest, callwhat_),
   PROTOBUF_FIELD_OFFSET(::rpc_example::RpcRequest, howmanyparams_),
   PROTOBUF_FIELD_OFFSET(::rpc_example::RpcRequest, params_),
   ~0u,  // no _has_bits_
@@ -76,7 +74,7 @@ const uint32_t TableStruct_rpc_5fexample_2eproto::offsets[] PROTOBUF_SECTION_VAR
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::rpc_example::RpcRequest)},
-  { 9, -1, -1, sizeof(::rpc_example::RpcResponse)},
+  { 8, -1, -1, sizeof(::rpc_example::RpcResponse)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
@@ -85,17 +83,20 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 
 const char descriptor_table_protodef_rpc_5fexample_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\021rpc_example.proto\022\013rpc_example\"E\n\nRpcR"
-  "equest\022\020\n\010callwhat\030\001 \001(\t\022\025\n\rhowmanyparam"
-  "s\030\002 \001(\005\022\016\n\006params\030\003 \003(\005\"W\n\013RpcResponse\022\020"
-  "\n\006solved\030\001 \001(\010H\000\022\020\n\006result\030\002 \001(\005H\001B\021\n\017op"
-  "tional_solvedB\021\n\017optional_result2H\n\nRpcS"
-  "ervice\022:\n\005Solve\022\027.rpc_example.RpcRequest"
-  "\032\030.rpc_example.RpcResponseB\003\200\001\001b\006proto3"
+  "\n\021rpc_example.proto\022\013rpc_example\"3\n\nRpcR"
+  "equest\022\025\n\rhowmanyparams\030\002 \001(\005\022\016\n\006params\030"
+  "\003 \003(\005\"W\n\013RpcResponse\022\020\n\006solved\030\001 \001(\010H\000\022\020"
+  "\n\006result\030\002 \001(\005H\001B\021\n\017optional_solvedB\021\n\017o"
+  "ptional_result2J\n\016RpcService_add\0228\n\003add\022"
+  "\027.rpc_example.RpcRequest\032\030.rpc_example.R"
+  "pcResponse2`\n\031RpcService_multiplication\022"
+  "C\n\016multiplication\022\027.rpc_example.RpcReque"
+  "st\032\030.rpc_example.RpcResponseB\003\200\001\001b\006proto"
+  "3"
   ;
 static ::_pbi::once_flag descriptor_table_rpc_5fexample_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_rpc_5fexample_2eproto = {
-    false, false, 279, descriptor_table_protodef_rpc_5fexample_2eproto,
+    false, false, 361, descriptor_table_protodef_rpc_5fexample_2eproto,
     "rpc_example.proto",
     &descriptor_table_rpc_5fexample_2eproto_once, nullptr, 0, 2,
     schemas, file_default_instances, TableStruct_rpc_5fexample_2eproto::offsets,
@@ -127,23 +128,11 @@ RpcRequest::RpcRequest(const RpcRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       params_(from.params_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  callwhat_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    callwhat_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_callwhat().empty()) {
-    callwhat_.Set(from._internal_callwhat(), 
-      GetArenaForAllocation());
-  }
   howmanyparams_ = from.howmanyparams_;
   // @@protoc_insertion_point(copy_constructor:rpc_example.RpcRequest)
 }
 
 inline void RpcRequest::SharedCtor() {
-callwhat_.InitDefault();
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  callwhat_.Set("", GetArenaForAllocation());
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 howmanyparams_ = 0;
 }
 
@@ -158,7 +147,6 @@ RpcRequest::~RpcRequest() {
 
 inline void RpcRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  callwhat_.Destroy();
 }
 
 void RpcRequest::SetCachedSize(int size) const {
@@ -172,7 +160,6 @@ void RpcRequest::Clear() {
   (void) cached_has_bits;
 
   params_.Clear();
-  callwhat_.ClearToEmpty();
   howmanyparams_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -183,16 +170,6 @@ const char* RpcRequest::_InternalParse(const char* ptr, ::_pbi::ParseContext* ct
     uint32_t tag;
     ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
-      // string callwhat = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          auto str = _internal_mutable_callwhat();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "rpc_example.RpcRequest.callwhat"));
-        } else
-          goto handle_unusual;
-        continue;
       // int32 howmanyparams = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
@@ -241,16 +218,6 @@ uint8_t* RpcRequest::_InternalSerialize(
   uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string callwhat = 1;
-  if (!this->_internal_callwhat().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_callwhat().data(), static_cast<int>(this->_internal_callwhat().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "rpc_example.RpcRequest.callwhat");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_callwhat(), target);
-  }
-
   // int32 howmanyparams = 2;
   if (this->_internal_howmanyparams() != 0) {
     target = stream->EnsureSpace(target);
@@ -296,13 +263,6 @@ size_t RpcRequest::ByteSizeLong() const {
     total_size += data_size;
   }
 
-  // string callwhat = 1;
-  if (!this->_internal_callwhat().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_callwhat());
-  }
-
   // int32 howmanyparams = 2;
   if (this->_internal_howmanyparams() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_howmanyparams());
@@ -331,9 +291,6 @@ void RpcRequest::MergeFrom(const RpcRequest& from) {
   (void) cached_has_bits;
 
   params_.MergeFrom(from.params_);
-  if (!from._internal_callwhat().empty()) {
-    _internal_set_callwhat(from._internal_callwhat());
-  }
   if (from._internal_howmanyparams() != 0) {
     _internal_set_howmanyparams(from._internal_howmanyparams());
   }
@@ -353,14 +310,8 @@ bool RpcRequest::IsInitialized() const {
 
 void RpcRequest::InternalSwap(RpcRequest* other) {
   using std::swap;
-  auto* lhs_arena = GetArenaForAllocation();
-  auto* rhs_arena = other->GetArenaForAllocation();
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   params_.InternalSwap(&other->params_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &callwhat_, lhs_arena,
-      &other->callwhat_, rhs_arena
-  );
   swap(howmanyparams_, other->howmanyparams_);
 }
 
@@ -646,26 +597,26 @@ void RpcResponse::InternalSwap(RpcResponse* other) {
 
 // ===================================================================
 
-RpcService::~RpcService() {}
+RpcService_add::~RpcService_add() {}
 
-const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* RpcService::descriptor() {
+const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* RpcService_add::descriptor() {
   ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_rpc_5fexample_2eproto);
   return file_level_service_descriptors_rpc_5fexample_2eproto[0];
 }
 
-const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* RpcService::GetDescriptor() {
+const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* RpcService_add::GetDescriptor() {
   return descriptor();
 }
 
-void RpcService::Solve(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+void RpcService_add::add(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                          const ::rpc_example::RpcRequest*,
                          ::rpc_example::RpcResponse*,
                          ::google::protobuf::Closure* done) {
-  controller->SetFailed("Method Solve() not implemented.");
+  controller->SetFailed("Method add() not implemented.");
   done->Run();
 }
 
-void RpcService::CallMethod(const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method,
+void RpcService_add::CallMethod(const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method,
                              ::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                              const ::PROTOBUF_NAMESPACE_ID::Message* request,
                              ::PROTOBUF_NAMESPACE_ID::Message* response,
@@ -673,7 +624,7 @@ void RpcService::CallMethod(const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* met
   GOOGLE_DCHECK_EQ(method->service(), file_level_service_descriptors_rpc_5fexample_2eproto[0]);
   switch(method->index()) {
     case 0:
-      Solve(controller,
+      add(controller,
              ::PROTOBUF_NAMESPACE_ID::internal::DownCast<const ::rpc_example::RpcRequest*>(
                  request),
              ::PROTOBUF_NAMESPACE_ID::internal::DownCast<::rpc_example::RpcResponse*>(
@@ -686,7 +637,7 @@ void RpcService::CallMethod(const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* met
   }
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message& RpcService::GetRequestPrototype(
+const ::PROTOBUF_NAMESPACE_ID::Message& RpcService_add::GetRequestPrototype(
     const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method) const {
   GOOGLE_DCHECK_EQ(method->service(), descriptor());
   switch(method->index()) {
@@ -699,7 +650,7 @@ const ::PROTOBUF_NAMESPACE_ID::Message& RpcService::GetRequestPrototype(
   }
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message& RpcService::GetResponsePrototype(
+const ::PROTOBUF_NAMESPACE_ID::Message& RpcService_add::GetResponsePrototype(
     const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method) const {
   GOOGLE_DCHECK_EQ(method->service(), descriptor());
   switch(method->index()) {
@@ -712,18 +663,104 @@ const ::PROTOBUF_NAMESPACE_ID::Message& RpcService::GetResponsePrototype(
   }
 }
 
-RpcService_Stub::RpcService_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel)
+RpcService_add_Stub::RpcService_add_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel)
   : channel_(channel), owns_channel_(false) {}
-RpcService_Stub::RpcService_Stub(
+RpcService_add_Stub::RpcService_add_Stub(
     ::PROTOBUF_NAMESPACE_ID::RpcChannel* channel,
     ::PROTOBUF_NAMESPACE_ID::Service::ChannelOwnership ownership)
   : channel_(channel),
     owns_channel_(ownership == ::PROTOBUF_NAMESPACE_ID::Service::STUB_OWNS_CHANNEL) {}
-RpcService_Stub::~RpcService_Stub() {
+RpcService_add_Stub::~RpcService_add_Stub() {
   if (owns_channel_) delete channel_;
 }
 
-void RpcService_Stub::Solve(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+void RpcService_add_Stub::add(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                              const ::rpc_example::RpcRequest* request,
+                              ::rpc_example::RpcResponse* response,
+                              ::google::protobuf::Closure* done) {
+  channel_->CallMethod(descriptor()->method(0),
+                       controller, request, response, done);
+}
+// ===================================================================
+
+RpcService_multiplication::~RpcService_multiplication() {}
+
+const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* RpcService_multiplication::descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_rpc_5fexample_2eproto);
+  return file_level_service_descriptors_rpc_5fexample_2eproto[1];
+}
+
+const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* RpcService_multiplication::GetDescriptor() {
+  return descriptor();
+}
+
+void RpcService_multiplication::multiplication(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                         const ::rpc_example::RpcRequest*,
+                         ::rpc_example::RpcResponse*,
+                         ::google::protobuf::Closure* done) {
+  controller->SetFailed("Method multiplication() not implemented.");
+  done->Run();
+}
+
+void RpcService_multiplication::CallMethod(const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method,
+                             ::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                             const ::PROTOBUF_NAMESPACE_ID::Message* request,
+                             ::PROTOBUF_NAMESPACE_ID::Message* response,
+                             ::google::protobuf::Closure* done) {
+  GOOGLE_DCHECK_EQ(method->service(), file_level_service_descriptors_rpc_5fexample_2eproto[1]);
+  switch(method->index()) {
+    case 0:
+      multiplication(controller,
+             ::PROTOBUF_NAMESPACE_ID::internal::DownCast<const ::rpc_example::RpcRequest*>(
+                 request),
+             ::PROTOBUF_NAMESPACE_ID::internal::DownCast<::rpc_example::RpcResponse*>(
+                 response),
+             done);
+      break;
+    default:
+      GOOGLE_LOG(FATAL) << "Bad method index; this should never happen.";
+      break;
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message& RpcService_multiplication::GetRequestPrototype(
+    const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method) const {
+  GOOGLE_DCHECK_EQ(method->service(), descriptor());
+  switch(method->index()) {
+    case 0:
+      return ::rpc_example::RpcRequest::default_instance();
+    default:
+      GOOGLE_LOG(FATAL) << "Bad method index; this should never happen.";
+      return *::PROTOBUF_NAMESPACE_ID::MessageFactory::generated_factory()
+          ->GetPrototype(method->input_type());
+  }
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message& RpcService_multiplication::GetResponsePrototype(
+    const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method) const {
+  GOOGLE_DCHECK_EQ(method->service(), descriptor());
+  switch(method->index()) {
+    case 0:
+      return ::rpc_example::RpcResponse::default_instance();
+    default:
+      GOOGLE_LOG(FATAL) << "Bad method index; this should never happen.";
+      return *::PROTOBUF_NAMESPACE_ID::MessageFactory::generated_factory()
+          ->GetPrototype(method->output_type());
+  }
+}
+
+RpcService_multiplication_Stub::RpcService_multiplication_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel)
+  : channel_(channel), owns_channel_(false) {}
+RpcService_multiplication_Stub::RpcService_multiplication_Stub(
+    ::PROTOBUF_NAMESPACE_ID::RpcChannel* channel,
+    ::PROTOBUF_NAMESPACE_ID::Service::ChannelOwnership ownership)
+  : channel_(channel),
+    owns_channel_(ownership == ::PROTOBUF_NAMESPACE_ID::Service::STUB_OWNS_CHANNEL) {}
+RpcService_multiplication_Stub::~RpcService_multiplication_Stub() {
+  if (owns_channel_) delete channel_;
+}
+
+void RpcService_multiplication_Stub::multiplication(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                               const ::rpc_example::RpcRequest* request,
                               ::rpc_example::RpcResponse* response,
                               ::google::protobuf::Closure* done) {

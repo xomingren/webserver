@@ -79,6 +79,7 @@ EchoServer::EchoServer(EventLoop* loop)
 	  starttime_(Timestamp::Now()),
 	  counter(0)
 {
+	tcpserver_.SetThreadNum(4);
 	//tcpserver_.set_messagecallback(bind(&EchoServer::OnMessage,this, placeholders::_1,placeholders::_2, placeholders::_3));
 	tcpserver_.set_messagecallback(std::bind(&LengthHeaderCodec::OnMessage, &codec_, placeholders::_1, placeholders::_2, placeholders::_3));
 	tcpserver_.set_connectioncallback(bind(&EchoServer::OnConnection, this, placeholders::_1));
@@ -162,11 +163,11 @@ void EchoServer::PrintThroughput()
 	starttime_ = endtime;
 }
 
-//int main(int args, char** argv)
-//{
-//	EventLoop loop;
-//	EchoServer echoserver(&loop);
-//	echoserver.Start();
-//	loop.Loop();
-//	return 0;
-//}
+int main(int args, char** argv)
+{
+	EventLoop loop;
+	EchoServer echoserver(&loop);
+	echoserver.Start();
+	loop.Loop();
+	return 0;
+}

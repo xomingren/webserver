@@ -6,6 +6,7 @@
 
 #include <iostream>//for cout
 
+#include "channel_class.h"
 #include "commonfunction.h"
 #include "eventloop_class.h"
 

@@ -8,38 +8,36 @@
 
 #include "noncopyable_class.h"
 
+class Thread : noncopyable
+{
+public:
+	using ThreadFunc = std::function<void()>;
 
+	explicit Thread(ThreadFunc, const std::string& name = std::string());
+	// FIXME: make it movable in C++11
+	~Thread();
 
-	class Thread : noncopyable
-	{
-	public:
-		using ThreadFunc = std::function<void()>;
+	void Start();
+	void Join(); // return join()
 
-		explicit Thread(ThreadFunc, const std::string& name = std::string());
-		// FIXME: make it movable in C++11
-		~Thread();
+	bool Started() const { return started_; }
+	// pthread_t pthreadId() const { return pthreadId_; }
+	pid_t Tid() const { return tid_; }
+	const std::string& Name() const { return name_; }
 
-		void Start();
-		void Join(); // return pthread_join()
+	static int NumCreated() { return numcreated_.load(); }
 
-		bool Started() const { return started_; }
-		// pthread_t pthreadId() const { return pthreadId_; }
-		pid_t Tid() const { return tid_; }
-		const std::string& Name() const { return name_; }
+private:
+	void SetDefaultName();
 
-		static int NumCreated() { return numcreated_.load(); }
+	bool started_;
+	bool joined_;
+	std::thread  thread_;
+	pid_t tid_;// used to  identity one thread
+	ThreadFunc func_;
+	std::string name_;
+	std::latch latch_;
 
-	private:
-		void SetDefaultName();
-
-		bool       started_;
-		bool       joined_;
-		std::thread  thread_;
-		pid_t      tid_;// used to  identity one thread
-		ThreadFunc func_;
-		std::string     name_;
-		std::latch latch_;
-
-		static std:: atomic<int32_t> numcreated_; //how many thread been created
-	};
+	static std:: atomic<int32_t> numcreated_; //how many thread been created
+};
 

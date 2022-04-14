@@ -2,7 +2,6 @@
 
 #include "channel_class.h"
 #include "define.h"
-#include "eventloop_class.h"
 #include "noncopyable_class.h"
 
 class Acceptor :public noncopyable
@@ -16,6 +15,8 @@ public:
 	void set_callbackfunc(NewConnectionCallback cb)
 	{ callbackfunc_ = cb; }
 
+	bool Listenning() const { return listenning_; }
+
 	void Start();
 
 private:
@@ -26,5 +27,6 @@ private:
 	FD listenfd_;
 	Channel acceptchannel_;
 	NewConnectionCallback callbackfunc_;	
+	bool listenning_;
 };
 

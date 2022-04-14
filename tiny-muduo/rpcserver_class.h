@@ -13,7 +13,7 @@ namespace google {
 }  // namespace google
 
 
-
+//a wrapper to tcpserver, once a connection established, create a rpcchannel and bind to tcpconnection
 class RpcServer
 {
     public:

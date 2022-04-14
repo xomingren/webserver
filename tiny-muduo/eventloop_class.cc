@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 
+#include "epoll_class.h"
 #include "timerqueue_class.h"
 
 using namespace std;
@@ -29,7 +30,7 @@ EventLoop::~EventLoop()
     wakeupchannel_->DisableAll();
     wakeupchannel_->Remove();
     ::close(wakeupfd_);
-    //t_loopInThisThread = NULL;
+    //t_loopInThisThread = nullptr;
 }
 
 void EventLoop::Loop()

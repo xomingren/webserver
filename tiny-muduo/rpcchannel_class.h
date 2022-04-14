@@ -46,12 +46,12 @@ public:
 
     ~RpcChannel() override;
 
-    void setConnection(const TcpConnectionPtr& conn)
+    void set_connection(const TcpConnectionPtr& conn)
     {
-        conn_ = conn;
+        connection_ = conn;
     }
 
-    void setServices(const std::map<std::string, ::google::protobuf::Service*>* services)
+    void set_services(const std::map<std::string, ::google::protobuf::Service*>* services)
     {
         services_ = services;
     }
@@ -62,21 +62,21 @@ public:
     // need not be of any specific class as long as their descriptors are
     // method->input_type() and method->output_type().
     void CallMethod(const ::google::protobuf::MethodDescriptor* method,
-        ::google::protobuf::RpcController* controller,
-        const ::google::protobuf::Message* request,
-        ::google::protobuf::Message* response,
-        ::google::protobuf::Closure* done) override;
+                    ::google::protobuf::RpcController* controller,
+                    const ::google::protobuf::Message* request,
+                    ::google::protobuf::Message* response,
+                    ::google::protobuf::Closure* done) override;
 
-    void onMessage(const TcpConnectionPtr& conn,
+    void OnMessage(const TcpConnectionPtr& conn,
         Buffer* buf,
-        Timestamp receiveTime);
+        Timestamp receivetime);
 
 private:
-    void onRpcMessage(const TcpConnectionPtr& conn,
+    void OnRpcMessage(const TcpConnectionPtr& conn,
         const detail::RpcMessagePtr& messagePtr,
-        Timestamp receiveTime);
+        Timestamp receivetime);
 
-    void doneCallback(::google::protobuf::Message* response, int64_t id);
+    void DoneCallback(::google::protobuf::Message* response, int64_t id);
 
     struct OutstandingCall
     {
@@ -85,7 +85,7 @@ private:
     };
 
     detail::RpcCodec codec_;
-    TcpConnectionPtr conn_;
+    TcpConnectionPtr connection_;
     std::atomic<int64_t> id_;
 
     std::mutex mutex_;
@@ -93,4 +93,4 @@ private:
 
     const std::map<std::string, ::google::protobuf::Service*>* services_;
 };
-typedef std::shared_ptr<RpcChannel> RpcChannelPtr;
+using RpcChannelPtr = std::shared_ptr<RpcChannel>;

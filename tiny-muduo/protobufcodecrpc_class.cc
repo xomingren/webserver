@@ -10,62 +10,62 @@
 
 using namespace std;
 
-void ProtobufCodecRpc::send(const TcpConnectionPtr& conn,
+void ProtobufCodecRpc::Send(const TcpConnectionPtr& conn,
     const ::google::protobuf::Message& message)
 {
     // FIXME: serialize to TcpConnection::outputBuffer()
     Buffer buf;
-    fillEmptyBuffer(&buf, message);
+    FillEmptyBuffer(&buf, message);
     conn->Send(&buf);
 }
 
-void ProtobufCodecRpc::fillEmptyBuffer(Buffer* buf,
+void ProtobufCodecRpc::FillEmptyBuffer(Buffer* buf,
     const google::protobuf::Message& message)
 {
     assert(buf->ReadableBytes() == 0);
     // FIXME: can we move serialization & checksum to other thread?
     buf->Append(tag_);
 
-    int byte_size = serializeToBuffer(message, buf);
+    int bytesize = SerializeToBuffer(message, buf);
 
-    int32_t checkSum = checksum(buf->Peek(), static_cast<int>(buf->ReadableBytes()));
-    buf->AppendInt32(checkSum);
-    assert(buf->ReadableBytes() == tag_.size() + byte_size + kChecksumLen); (void)byte_size;
+    int32_t checksum = Checksum(buf->Peek(), static_cast<int>(buf->ReadableBytes()));
+    buf->AppendInt32(checksum);
+    assert(buf->ReadableBytes() == tag_.size() + bytesize + kChecksumLen); (void)bytesize;
     int32_t len = htonl(static_cast<int32_t>(buf->ReadableBytes()));
     buf->Prepend(&len, sizeof len);
 }
 
-void ProtobufCodecRpc::onMessage(const TcpConnectionPtr& conn,
+void ProtobufCodecRpc::OnMessage(const TcpConnectionPtr& conn,
     Buffer* buf,
-    Timestamp receiveTime)
+    Timestamp receivetime)
 {
     while (buf->ReadableBytes() >= static_cast<uint32_t>(kMinMessageLen + kHeaderLen))
     {
         const int32_t len = buf->PeekInt32();
         if (len > kMaxMessageLen || len < kMinMessageLen)
         {
-            errorCallback_(conn, buf, receiveTime, kInvalidLength);
+            errorcallback_(conn, buf, receivetime, kInvalidLength);
             break;
         }
         else if (buf->ReadableBytes() >= implicit_cast<size_t>(kHeaderLen + len))
         {
-            if (rawCb_ && !rawCb_(conn, string_view(buf->Peek(), kHeaderLen + len), receiveTime))
+            if (rawcb_ && !rawcb_(conn, string_view(buf->Peek(), kHeaderLen + len), receivetime))
             {
                 buf->Retrieve(kHeaderLen + len);
                 continue;
             }
             MessagePtr message(prototype_->New());
             // FIXME: can we move deserialization & callback to other thread?
-            ErrorCode errorCode = parse(buf->Peek() + kHeaderLen, len, message.get());
-            if (errorCode == kNoError)
+            ErrorCode errorcode = Parse(buf->Peek() + kHeaderLen, len, message.get());
+            if (errorcode == kNoError)
             {
                 // FIXME: try { } catch (...) { }
-                messageCallback_(conn, message, receiveTime);
+                messagecallback_(conn, message, receivetime);
                 buf->Retrieve(kHeaderLen + len);
             }
             else
             {
-                errorCallback_(conn, buf, receiveTime, errorCode);
+                errorcallback_(conn, buf, receivetime, errorcode);
                 break;
             }
         }
@@ -76,25 +76,25 @@ void ProtobufCodecRpc::onMessage(const TcpConnectionPtr& conn,
     }
 }
 
-bool ProtobufCodecRpc::parseFromBuffer(string_view buf, google::protobuf::Message* message)
+bool ProtobufCodecRpc::ParseFromBuffer(string_view buf, google::protobuf::Message* message)
 {
     return message->ParseFromArray(buf.data(), static_cast<int>(buf.size()));
 }
 
-int ProtobufCodecRpc::serializeToBuffer(const google::protobuf::Message& message, Buffer* buf)
+int ProtobufCodecRpc::SerializeToBuffer(const google::protobuf::Message& message, Buffer* buf)
 {
 #if GOOGLE_PROTOBUF_VERSION > 3009002
-    int byte_size = google::protobuf::internal::ToIntSize(message.ByteSizeLong());
+    int bytesize = google::protobuf::internal::ToIntSize(message.ByteSizeLong());
 #else
     int byte_size = message.ByteSize();
 #endif
-    buf->EnsureWritableBytes(byte_size + kChecksumLen);
+    buf->EnsureWritableBytes(bytesize + kChecksumLen);
 
     uint8_t* start = reinterpret_cast<uint8_t*>(buf->BeginWrite());
     uint8_t* end = message.SerializeWithCachedSizesToArray(start);
-    assert(end - start == byte_size);
-    buf->HasWritten(byte_size);
-    return byte_size;
+    assert(end - start == bytesize); (void)start,(void)end;
+    buf->HasWritten(bytesize);
+    return bytesize;
 }
 
 namespace
@@ -108,9 +108,9 @@ namespace
     const string kUnknownErrorStr = "UnknownError";
 }
 
-const string& ProtobufCodecRpc::errorCodeToString(ErrorCode errorCode)
+const string& ProtobufCodecRpc::ErrorCodeToString(ErrorCode errorcode)
 {
-    switch (errorCode)
+    switch (errorcode)
     {
     case kNoError:
         return kNoErrorStr;
@@ -129,53 +129,53 @@ const string& ProtobufCodecRpc::errorCodeToString(ErrorCode errorCode)
     }
 }
 
-void ProtobufCodecRpc::defaultErrorCallback(const TcpConnectionPtr& conn,
+void ProtobufCodecRpc::DefaultErrorCallback(const TcpConnectionPtr& conn,
     Buffer* buf,
     Timestamp,
-    ErrorCode errorCode)
+    ErrorCode errorcode)
 {
-    cout << "ProtobufCodecLite::defaultErrorCallback - " << errorCodeToString(errorCode);
+    cout << "ProtobufCodecLite::defaultErrorCallback - " << ErrorCodeToString(errorcode);
     if (conn && conn->Connected())
     {
         conn->Shutdown();
     }
 }
 
-int32_t ProtobufCodecRpc::asInt32(const char* buf)
+int32_t ProtobufCodecRpc::AsInt32(const char* buf)
 {
     int32_t be32 = 0;
     ::memcpy(&be32, buf, sizeof(be32));
     return ntohl(be32);
 }
 
-int32_t ProtobufCodecRpc::checksum(const void* buf, int len)
+int32_t ProtobufCodecRpc::Checksum(const void* buf, int len)
 {
     return static_cast<int32_t>(
         ::adler32(1, static_cast<const Bytef*>(buf), len));
 }
 
-bool ProtobufCodecRpc::validateChecksum(const char* buf, int len)
+bool ProtobufCodecRpc::ValidateChecksum(const char* buf, int len)
 {
     // check sum
-    int32_t expectedCheckSum = asInt32(buf + len - kChecksumLen);
-    int32_t checkSum = checksum(buf, len - kChecksumLen);
-    return checkSum == expectedCheckSum;
+    int32_t expectedchecksum = AsInt32(buf + len - kChecksumLen);
+    int32_t checksum = Checksum(buf, len - kChecksumLen);
+    return checksum == expectedchecksum;
 }
 
-ProtobufCodecRpc::ErrorCode ProtobufCodecRpc::parse(const char* buf,
+ProtobufCodecRpc::ErrorCode ProtobufCodecRpc::Parse(const char* buf,
     int len,
     ::google::protobuf::Message* message)
 {
     ErrorCode error = kNoError;
 
-    if (validateChecksum(buf, len))
+    if (ValidateChecksum(buf, len))
     {
         if (memcmp(buf, tag_.data(), tag_.size()) == 0)
         {
             // parse from buffer
             const char* data = buf + tag_.size();
             int32_t dataLen = len - kChecksumLen - static_cast<int>(tag_.size());
-            if (parseFromBuffer(string_view(data, dataLen), message))
+            if (ParseFromBuffer(string_view(data, dataLen), message))
             {
                 error = kNoError;
             }

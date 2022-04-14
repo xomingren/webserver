@@ -8,11 +8,9 @@
 
 #include <iostream>
 
-#include "channel_class.h"
 #include "eventloop_class.h"
 #include "timer_class.h"
 #include "timerid_class.h"
-#include "timestamp_class.h"
 
 using namespace std;
 

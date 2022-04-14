@@ -6,12 +6,15 @@
 
 #include <iostream>//for cout
 
+#include "eventloop_class.h"
+
 using namespace std;
 
 Acceptor::Acceptor(EventLoop* loop)
   : loop_(loop),
     listenfd_(CreateSocketAndListenOrDie()),
-    acceptchannel_(loop, listenfd_)
+    acceptchannel_(loop, listenfd_),
+    listenning_(false)
 {
     acceptchannel_.set_readcallback(bind(&Acceptor::OnAccept, this));
 }
@@ -60,6 +63,7 @@ void Acceptor::OnAccept()
 void Acceptor::Start()
 {
     loop_->AssertInLoopThread();
+    listenning_ = true;
     //the event int acceptchannel_ marked as EPOLLIN | EPOLLET ,means this channel will be triggered when in event comes(epoll_waits return)
     //most important step because it'll sign its own channels' socketfd to epollfd
     acceptchannel_.EnableRead();

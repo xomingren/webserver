@@ -181,7 +181,6 @@ class RpcRequest final :
 
   enum : int {
     kParamsFieldNumber = 3,
-    kCallwhatFieldNumber = 1,
     kHowmanyparamsFieldNumber = 2,
   };
   // repeated int32 params = 3;
@@ -206,20 +205,6 @@ class RpcRequest final :
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< int32_t >*
       mutable_params();
 
-  // string callwhat = 1;
-  void clear_callwhat();
-  const std::string& callwhat() const;
-  template <typename ArgT0 = const std::string&, typename... ArgT>
-  void set_callwhat(ArgT0&& arg0, ArgT... args);
-  std::string* mutable_callwhat();
-  PROTOBUF_NODISCARD std::string* release_callwhat();
-  void set_allocated_callwhat(std::string* callwhat);
-  private:
-  const std::string& _internal_callwhat() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_callwhat(const std::string& value);
-  std::string* _internal_mutable_callwhat();
-  public:
-
   // int32 howmanyparams = 2;
   void clear_howmanyparams();
   int32_t howmanyparams() const;
@@ -238,7 +223,6 @@ class RpcRequest final :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedField< int32_t > params_;
   mutable std::atomic<int> _params_cached_byte_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr callwhat_;
   int32_t howmanyparams_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_rpc_5fexample_2eproto;
@@ -439,20 +423,20 @@ class RpcResponse final :
 };
 // ===================================================================
 
-class RpcService_Stub;
+class RpcService_add_Stub;
 
-class RpcService : public ::PROTOBUF_NAMESPACE_ID::Service {
+class RpcService_add : public ::PROTOBUF_NAMESPACE_ID::Service {
  protected:
   // This class should be treated as an abstract interface.
-  inline RpcService() {};
+  inline RpcService_add() {};
  public:
-  virtual ~RpcService();
+  virtual ~RpcService_add();
 
-  typedef RpcService_Stub Stub;
+  typedef RpcService_add_Stub Stub;
 
   static const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* descriptor();
 
-  virtual void Solve(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+  virtual void add(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                        const ::rpc_example::RpcRequest* request,
                        ::rpc_example::RpcResponse* response,
                        ::google::protobuf::Closure* done);
@@ -471,28 +455,87 @@ class RpcService : public ::PROTOBUF_NAMESPACE_ID::Service {
     const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method) const;
 
  private:
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RpcService);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RpcService_add);
 };
 
-class RpcService_Stub : public RpcService {
+class RpcService_add_Stub : public RpcService_add {
  public:
-  RpcService_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel);
-  RpcService_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel,
+  RpcService_add_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel);
+  RpcService_add_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel,
                    ::PROTOBUF_NAMESPACE_ID::Service::ChannelOwnership ownership);
-  ~RpcService_Stub();
+  ~RpcService_add_Stub();
 
   inline ::PROTOBUF_NAMESPACE_ID::RpcChannel* channel() { return channel_; }
 
-  // implements RpcService ------------------------------------------
+  // implements RpcService_add ------------------------------------------
 
-  void Solve(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+  void add(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                        const ::rpc_example::RpcRequest* request,
                        ::rpc_example::RpcResponse* response,
                        ::google::protobuf::Closure* done);
  private:
   ::PROTOBUF_NAMESPACE_ID::RpcChannel* channel_;
   bool owns_channel_;
-  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RpcService_Stub);
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RpcService_add_Stub);
+};
+
+
+// -------------------------------------------------------------------
+
+class RpcService_multiplication_Stub;
+
+class RpcService_multiplication : public ::PROTOBUF_NAMESPACE_ID::Service {
+ protected:
+  // This class should be treated as an abstract interface.
+  inline RpcService_multiplication() {};
+ public:
+  virtual ~RpcService_multiplication();
+
+  typedef RpcService_multiplication_Stub Stub;
+
+  static const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* descriptor();
+
+  virtual void multiplication(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                       const ::rpc_example::RpcRequest* request,
+                       ::rpc_example::RpcResponse* response,
+                       ::google::protobuf::Closure* done);
+
+  // implements Service ----------------------------------------------
+
+  const ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor* GetDescriptor();
+  void CallMethod(const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method,
+                  ::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                  const ::PROTOBUF_NAMESPACE_ID::Message* request,
+                  ::PROTOBUF_NAMESPACE_ID::Message* response,
+                  ::google::protobuf::Closure* done);
+  const ::PROTOBUF_NAMESPACE_ID::Message& GetRequestPrototype(
+    const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method) const;
+  const ::PROTOBUF_NAMESPACE_ID::Message& GetResponsePrototype(
+    const ::PROTOBUF_NAMESPACE_ID::MethodDescriptor* method) const;
+
+ private:
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RpcService_multiplication);
+};
+
+class RpcService_multiplication_Stub : public RpcService_multiplication {
+ public:
+  RpcService_multiplication_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel);
+  RpcService_multiplication_Stub(::PROTOBUF_NAMESPACE_ID::RpcChannel* channel,
+                   ::PROTOBUF_NAMESPACE_ID::Service::ChannelOwnership ownership);
+  ~RpcService_multiplication_Stub();
+
+  inline ::PROTOBUF_NAMESPACE_ID::RpcChannel* channel() { return channel_; }
+
+  // implements RpcService_multiplication ------------------------------------------
+
+  void multiplication(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                       const ::rpc_example::RpcRequest* request,
+                       ::rpc_example::RpcResponse* response,
+                       ::google::protobuf::Closure* done);
+ private:
+  ::PROTOBUF_NAMESPACE_ID::RpcChannel* channel_;
+  bool owns_channel_;
+  GOOGLE_DISALLOW_EVIL_CONSTRUCTORS(RpcService_multiplication_Stub);
 };
 
 
@@ -506,56 +549,6 @@ class RpcService_Stub : public RpcService {
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
 // RpcRequest
-
-// string callwhat = 1;
-inline void RpcRequest::clear_callwhat() {
-  callwhat_.ClearToEmpty();
-}
-inline const std::string& RpcRequest::callwhat() const {
-  // @@protoc_insertion_point(field_get:rpc_example.RpcRequest.callwhat)
-  return _internal_callwhat();
-}
-template <typename ArgT0, typename... ArgT>
-inline PROTOBUF_ALWAYS_INLINE
-void RpcRequest::set_callwhat(ArgT0&& arg0, ArgT... args) {
- 
- callwhat_.Set(static_cast<ArgT0 &&>(arg0), args..., GetArenaForAllocation());
-  // @@protoc_insertion_point(field_set:rpc_example.RpcRequest.callwhat)
-}
-inline std::string* RpcRequest::mutable_callwhat() {
-  std::string* _s = _internal_mutable_callwhat();
-  // @@protoc_insertion_point(field_mutable:rpc_example.RpcRequest.callwhat)
-  return _s;
-}
-inline const std::string& RpcRequest::_internal_callwhat() const {
-  return callwhat_.Get();
-}
-inline void RpcRequest::_internal_set_callwhat(const std::string& value) {
-  
-  callwhat_.Set(value, GetArenaForAllocation());
-}
-inline std::string* RpcRequest::_internal_mutable_callwhat() {
-  
-  return callwhat_.Mutable(GetArenaForAllocation());
-}
-inline std::string* RpcRequest::release_callwhat() {
-  // @@protoc_insertion_point(field_release:rpc_example.RpcRequest.callwhat)
-  return callwhat_.Release();
-}
-inline void RpcRequest::set_allocated_callwhat(std::string* callwhat) {
-  if (callwhat != nullptr) {
-    
-  } else {
-    
-  }
-  callwhat_.SetAllocated(callwhat, GetArenaForAllocation());
-#ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (callwhat_.IsDefault()) {
-    callwhat_.Set("", GetArenaForAllocation());
-  }
-#endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:rpc_example.RpcRequest.callwhat)
-}
 
 // int32 howmanyparams = 2;
 inline void RpcRequest::clear_howmanyparams() {

@@ -16,8 +16,8 @@ const int Connector::kMaxRetryDelayMs;
 Connector::Connector(EventLoop* loop)
   : loop_(loop),
     connect_(false),
-    state_(kDisconnected),
-    retryDelayMs_(kInitRetryDelayMs)
+    state_(States::kDisconnected),
+    retrydelayms_(kInitRetryDelayMs)
 {
   
 }
@@ -27,19 +27,19 @@ Connector::~Connector()
   assert(!channel_);
 }
 
-void Connector::start()
+void Connector::Start()
 {
   connect_ = true;
-  loop_->RunInLoop(std::bind(&Connector::startInLoop, this)); // FIXME: unsafe
+  loop_->RunInLoop(std::bind(&Connector::StartInLoop, this)); // FIXME: unsafe
 }
 
-void Connector::startInLoop()
+void Connector::StartInLoop()
 {
   loop_->AssertInLoopThread();
-  assert(state_ == kDisconnected);
+  assert(state_ == States::kDisconnected);
   if (connect_)
   {
-    connect();
+    Connect();
   }
   else
   {
@@ -47,25 +47,25 @@ void Connector::startInLoop()
   }
 }
 
-void Connector::stop()
+void Connector::Stop()
 {
   connect_ = false;
-  loop_->QueueInLoop(std::bind(&Connector::stopInLoop, this)); // FIXME: unsafe
+  loop_->QueueInLoop(std::bind(&Connector::StopInLoop, this)); // FIXME: unsafe
   // FIXME: cancel timer
 }
 
-void Connector::stopInLoop()
+void Connector::StopInLoop()
 {
   loop_->AssertInLoopThread();
-  if (state_ == kConnecting)
+  if (state_ == States::kConnecting)
   {
-    setState(kDisconnected);
-    int sockfd = removeAndResetChannel();
-    retry(sockfd);
+    set_state(States::kDisconnected);
+    int sockfd = RemoveAndResetChannel();
+    Retry(sockfd);
   }
 }
 
-void Connector::connect()
+void Connector::Connect()
 {
   //int connsockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
 
@@ -97,7 +97,7 @@ void Connector::connect()
     case EINPROGRESS:
     case EINTR:
     case EISCONN:
-      connecting(connsockfd);
+      Connecting(connsockfd);
       break;
 
     case EAGAIN:
@@ -105,7 +105,7 @@ void Connector::connect()
     case EADDRNOTAVAIL:
     case ECONNREFUSED:
     case ENETUNREACH:
-      retry(connsockfd);
+      Retry(connsockfd);
       break;
 
     case EACCES:
@@ -125,48 +125,48 @@ void Connector::connect()
   }
 }
 
-void Connector::restart()
+void Connector::Restart()
 {
   loop_->AssertInLoopThread();
-  setState(kDisconnected);
-  retryDelayMs_ = kInitRetryDelayMs;
+  set_state(States::kDisconnected);
+  retrydelayms_ = kInitRetryDelayMs;
   connect_ = true;
-  startInLoop();
+  StartInLoop();
 }
 
-void Connector::connecting(int sockfd)
+void Connector::Connecting(int sockfd)
 {
-  setState(kConnecting);
+    set_state(States::kConnecting);
   assert(!channel_);
   channel_.reset(new Channel(loop_, sockfd));
   channel_->set_writecallback(
-      std::bind(&Connector::handleWrite, this)); // FIXME: unsafe
+      std::bind(&Connector::HandleWrite, this)); // FIXME: unsafe
 
   // channel_->tie(shared_from_this()); is not working,
   // as channel_ is not managed by shared_ptr
   channel_->EnableWrite();
 }
 
-int Connector::removeAndResetChannel()
+int Connector::RemoveAndResetChannel()
 {
   channel_->DisableAll();
   channel_->Remove();
   int sockfd = channel_->get_FD();
   // Can't reset channel_ here, because we are inside Channel::handleEvent
-  loop_->QueueInLoop(std::bind(&Connector::resetChannel, this)); // FIXME: unsafe
+  loop_->QueueInLoop(std::bind(&Connector::ResetChannel, this)); // FIXME: unsafe
   return sockfd;
 }
 
-void Connector::resetChannel()
+void Connector::ResetChannel()
 {
   channel_.reset();
 }
 
-void Connector::handleWrite()
+void Connector::HandleWrite()
 {
-  if (state_ == kConnecting)
+  if (state_ == States::kConnecting)
   {
-    int sockfd = removeAndResetChannel();
+    int sockfd = RemoveAndResetChannel();
     int err;
     int optval;
     socklen_t optlen = static_cast<socklen_t>(sizeof optval);
@@ -181,7 +181,7 @@ void Connector::handleWrite()
     } 
     if (err)
     {
-      retry(sockfd);
+      Retry(sockfd);
     }
    /* else if (sockets::isSelfConnect(sockfd))
     {
@@ -189,10 +189,10 @@ void Connector::handleWrite()
     }*/
     else
     {
-      setState(kConnected);
+      set_state(States::kConnected);
       if (connect_)
       {
-        newConnectionCallback_(sockfd);
+        newconnectioncallback_(sockfd);
       }
       else
       {
@@ -203,29 +203,29 @@ void Connector::handleWrite()
   else
   {
     // what happened?
-    assert(state_ == kDisconnected);
+    assert(state_ == States::kDisconnected);
   }
 }
 
-void Connector::handleError()
+void Connector::HandleError()
 {
 
-  if (state_ == kConnecting)
+  if (state_ == States::kConnecting)
   {
-    int sockfd = removeAndResetChannel();
-    retry(sockfd);
+    int sockfd = RemoveAndResetChannel();
+    Retry(sockfd);
   }
 }
 
-void Connector::retry(int sockfd)
+void Connector::Retry(int sockfd)
 {
   ::close(sockfd);
-  setState(kDisconnected);
+  set_state(States::kDisconnected);
   if (connect_)
   {
-    loop_->RunAfter(retryDelayMs_/1000.0,
-                    std::bind(&Connector::startInLoop, shared_from_this()));
-    retryDelayMs_ = std::min(retryDelayMs_ * 2, kMaxRetryDelayMs);
+    loop_->RunAfter(retrydelayms_/1000.0,
+                    std::bind(&Connector::StartInLoop, shared_from_this()));
+    retrydelayms_ = std::min(retrydelayms_ * 2, kMaxRetryDelayMs);
   }
   else
   {

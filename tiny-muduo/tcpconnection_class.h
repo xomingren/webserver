@@ -6,10 +6,11 @@
 #include <string_view>
 
 #include "buffer_class.h"
-#include "channel_class.h"
 #include "define.h"
 #include "noncopyable_class.h"
-#include "timestamp_class.h"
+
+class Channel;
+class EventLoop;
 
 class TcpConnection : public std::enable_shared_from_this<TcpConnection>,
 						noncopyable

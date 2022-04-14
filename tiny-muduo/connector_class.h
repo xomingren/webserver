@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <functional>
 #include <memory>
 
@@ -17,33 +18,36 @@ class Connector : noncopyable,
   Connector(EventLoop* loop);
   ~Connector();
 
-  void setNewConnectionCallback(const NewConnectionCallback& cb)
-  { newConnectionCallback_ = cb; }
+  void set_newconnectioncallback(const NewConnectionCallback& cb)
+  { newconnectioncallback_ = cb; }
 
-  void start();  // can be called in any thread
-  void restart();  // must be called in loop thread
-  void stop();  // can be called in any thread
+  void Start();  // can be called in any thread
+  void Restart();  // must be called in loop thread
+  void Stop();  // can be called in any thread
 
  private:
-  enum States { kDisconnected, kConnecting, kConnected };
+  enum class States : char
+  { 
+      kDisconnected, kConnecting, kConnected
+  };
   static const int kMaxRetryDelayMs = 30*1000;
   static const int kInitRetryDelayMs = 500;
 
-  void setState(States s) { state_ = s; }
-  void startInLoop();
-  void stopInLoop();
-  void connect();
-  void connecting(int sockfd);
-  void handleWrite();
-  void handleError();
-  void retry(int sockfd);
-  int removeAndResetChannel();
-  void resetChannel();
+  void set_state(States s) { state_ = s; }
+  void StartInLoop();
+  void StopInLoop();
+  void Connect();
+  void Connecting(int sockfd);
+  void HandleWrite();
+  void HandleError();
+  void Retry(int sockfd);
+  int RemoveAndResetChannel();
+  void ResetChannel();
 
   EventLoop* loop_;
   bool connect_; // atomic
-  States state_;  // FIXME: use atomic variable
+  std:: atomic<States> state_;  // FIXME: use atomic variable
   std::unique_ptr<Channel> channel_;
-  NewConnectionCallback newConnectionCallback_;
-  int retryDelayMs_;
+  NewConnectionCallback newconnectioncallback_;
+  int retrydelayms_;
 };

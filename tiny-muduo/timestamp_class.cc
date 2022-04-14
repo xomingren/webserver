@@ -41,7 +41,7 @@ Timestamp Timestamp::Now()
 int64_t Timestamp::NowMicroSeconds()
 {
     struct timeval tv;
-    gettimeofday(&tv, NULL);
+    gettimeofday(&tv, nullptr);
     int64_t seconds = tv.tv_sec;
     return seconds * kMicroSecondsPerSecond + tv.tv_usec;
 }

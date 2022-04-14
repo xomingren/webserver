@@ -11,16 +11,16 @@ using namespace detail;
 using namespace tiny_muduo_rpc;
 
 RpcChannel::RpcChannel()
-    : codec_(std::bind(&RpcChannel::onRpcMessage, this, _1, _2, _3)),
-      services_(NULL)
+    : codec_(std::bind(&RpcChannel::OnRpcMessage, this, _1, _2, _3)),
+      services_(nullptr)
 {
     cout << "RpcChannel::ctor - " << this;
 }
 
 RpcChannel::RpcChannel(const TcpConnectionPtr& conn)
-    : codec_(std::bind(&RpcChannel::onRpcMessage, this, _1, _2, _3)),
-      conn_(conn),
-      services_(NULL)
+    : codec_(std::bind(&RpcChannel::OnRpcMessage, this, _1, _2, _3)),
+      connection_(conn),
+      services_(nullptr)
 {
     cout << "RpcChannel::ctor - " << this;
 }
@@ -60,21 +60,21 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor* method,
         lock_guard<mutex> lock(mutex_);
         outstandings_[id] = out;
     }
-    codec_.send(conn_, message);
+    codec_.Send(connection_, message);
 }
 
-void RpcChannel::onMessage(const TcpConnectionPtr& conn,
+void RpcChannel::OnMessage(const TcpConnectionPtr& conn,
     Buffer* buf,
     Timestamp receiveTime)
 {
-    codec_.onMessage(conn, buf, receiveTime);
+    codec_.OnMessage(conn, buf, receiveTime);
 }
 
-void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
+void RpcChannel::OnRpcMessage(const TcpConnectionPtr& conn,
     const RpcMessagePtr& messagePtr,
     Timestamp receiveTime)
 {
-    assert(conn == conn_);
+    assert(conn == connection_);
     //printf("%s\n", message.DebugString().c_str());
     tiny_muduo_rpc::RpcMessage& message = *messagePtr;
     if (message.type() == RESPONSE)
@@ -82,7 +82,7 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
         int64_t id = message.id();
         assert(message.has_response() || message.has_error());
 
-        OutstandingCall out = { NULL, NULL };
+        OutstandingCall out = { nullptr, nullptr };
 
         {
             lock_guard<mutex> lock(mutex_);
@@ -117,7 +117,7 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
             if (it != services_->end())
             {
                 google::protobuf::Service* service = it->second;
-                assert(service != NULL);
+                assert(service != nullptr);
                 const google::protobuf::ServiceDescriptor* desc = service->GetDescriptor();
                 const google::protobuf::MethodDescriptor* method
                     = desc->FindMethodByName(message.method());
@@ -129,8 +129,8 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
                         google::protobuf::Message* response = service->GetResponsePrototype(method).New();
                         // response is deleted in doneCallback
                         int64_t id = message.id();
-                        service->CallMethod(method, NULL, get_pointer(request), response,
-                            NewCallback(this, &RpcChannel::doneCallback, response, id));
+                        service->CallMethod(method, nullptr, get_pointer(request), response,
+                            NewCallback(this, &RpcChannel::DoneCallback, response, id));
                         error = NO_ERROR;
                     }
                     else
@@ -158,7 +158,7 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
             response.set_type(RESPONSE);
             response.set_id(message.id());
             response.set_error(error);
-            codec_.send(conn_, response);
+            codec_.Send(connection_, response);
         }
     }
     else if (message.type() == ERROR)
@@ -166,12 +166,12 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr& conn,
     }
 }
 
-void RpcChannel::doneCallback(::google::protobuf::Message* response, int64_t id)
+void RpcChannel::DoneCallback(::google::protobuf::Message* response, int64_t id)
 {
     std::unique_ptr<google::protobuf::Message> d(response);
     tiny_muduo_rpc::RpcMessage message;
     message.set_type(RESPONSE);
     message.set_id(id);
     message.set_response(response->SerializeAsString()); // FIXME: error check
-    codec_.send(conn_, message);
+    codec_.Send(connection_, message);
 }

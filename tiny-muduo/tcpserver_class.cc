@@ -6,13 +6,20 @@
 #include <memory>//for make_shared
 #include <string>
 
+#include "acceptor_class.h"
+#include "commonfunction.h"
+#include "eventloop_class.h"
+#include "eventloopthreadpool_class.h"
+
 using namespace std;
 
 TcpServer::TcpServer(EventLoop* loop)
-    : acceptor_(nullptr),  
+    : acceptor_(make_unique<Acceptor>(loop)),
       loop_(loop),
-      nextconnid_(1)
+      nextconnid_(1),
+      threadpool_(make_shared<EventLoopThreadPool>(loop))
 {
+    acceptor_->set_callbackfunc(bind(&TcpServer::OnNewConnection, this, placeholders::_1));
 }
 
 TcpServer::~TcpServer()
@@ -35,12 +42,12 @@ void TcpServer::OnNewConnection(SocketFD socketfd)
     //class channel will choose different callback(onaccept or on event) according to the
     //owner(acceptor or tcpconnection)
     loop_->AssertInLoopThread();
-    //EventLoop* ioLoop = threadPool_->getNextLoop(); //fixeme
+    EventLoop* ioloop = threadpool_->GetNextLoop(); 
     char buf[64];
     snprintf(buf, sizeof buf, "-%d", nextconnid_);
     ++nextconnid_;
     string connName = buf;
-    TcpConnectionPtr connection = make_shared<TcpConnection>( loop_, connName, socketfd);
+    TcpConnectionPtr connection = make_shared<TcpConnection>(ioloop, connName, socketfd);
     connection->Init();
     connections_[connName] = connection;
     connection->set_messagecallback(messagecallback_);
@@ -49,7 +56,13 @@ void TcpServer::OnNewConnection(SocketFD socketfd)
     connection->set_highwatermarkcallback(highwatermarkcallback_, highwatermark_);
     connection->set_closecallback(
         std::bind(&TcpServer::RemoveConnection, this, std::placeholders::_1)); // FIXME: unsafe
-    loop_->RunInLoop(std::bind(&TcpConnection::OnConnectEstablished, connection));
+    ioloop->RunInLoop(std::bind(&TcpConnection::OnConnectEstablished, connection));
+}
+
+void TcpServer::SetThreadNum(int numthreads)
+{
+    assert(0 <= numthreads);
+    threadpool_->SetThreadNum(numthreads);
 }
 
 void TcpServer::RemoveConnection(const TcpConnectionPtr& conn)
@@ -66,16 +79,22 @@ void TcpServer::RemoveConnectionInLoop(const TcpConnectionPtr& conn)
     size_t n = connections_.erase(conn->get_name());
     (void)n;
     assert(n == 1);
-    EventLoop* ioLoop = conn->get_loop();
-    ioLoop->QueueInLoop(
+    EventLoop* ioloop = conn->get_loop();
+    ioloop->QueueInLoop(
         std::bind(&TcpConnection::OnConnectDestroyed, conn));
 }
 
 void TcpServer::Start()
 {
-    acceptor_ = new Acceptor(loop_);//memory leak
     //when new connection comes,acceptor use a connectfd to save it and make it unblock,
     //then give the connectfd back to here,because a newconnection(decode sompute encode) is the save level with the acceptor,not belong to it 
-    acceptor_->set_callbackfunc(bind(&TcpServer::OnNewConnection,this,placeholders::_1));
-    acceptor_->Start();
+    //acceptor_->Start();
+    int isstarted = 0;
+    if (started_.compare_exchange_weak(isstarted,1))
+    {
+        threadpool_->Start(threadinitcallback_);
+
+        assert(!acceptor_->Listenning());
+        loop_->RunInLoop(std::bind(&Acceptor::Start, get_pointer(acceptor_)));
+    }
 }

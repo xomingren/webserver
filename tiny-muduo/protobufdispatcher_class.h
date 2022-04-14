@@ -41,7 +41,7 @@ public:
         Timestamp receivetime) const override
     {
         std::shared_ptr<T> concrete = down_pointer_cast<T>(message);
-        assert(concrete != NULL);
+        assert(concrete != nullptr);
         callback_(conn, concrete, receivetime);
     }
 

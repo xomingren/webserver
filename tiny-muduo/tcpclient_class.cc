@@ -1,8 +1,9 @@
 #include "tcpclient_class.h"
 
-#include "eventloop_class.h"
-
 #include <stdio.h>  // snprintf
+
+#include "connector_class.h"
+#include "eventloop_class.h"
 
 using namespace std;
 using namespace placeholders;
@@ -31,10 +32,10 @@ TcpClient::TcpClient(EventLoop* loop)
     messagecallback_(DefaultMessageCallback),
     retry_(false),
     connect_(true),
-    nextConnId_(1)
+    nextconnid_(1)
 {
-  connector_->setNewConnectionCallback(
-      std::bind(&TcpClient::newConnection, this, placeholders::_1));
+  connector_->set_newconnectioncallback(
+      std::bind(&TcpClient::NewConnection, this, placeholders::_1));
   // FIXME setConnectFailedCallback
   //LOG_INFO << "TcpClient::TcpClient[" << name_
   //         << "] - connector " << get_pointer(connector_);
@@ -65,22 +66,22 @@ TcpClient::~TcpClient()
   }
   else
   {
-    connector_->stop();
+    connector_->Stop();
     // FIXME: HACK
     loop_->RunAfter(1, std::bind(&detail::RemoveConnector, connector_));
   }
 }
 
-void TcpClient::connect()
+void TcpClient::Connect()
 {
   // FIXME: check state
  /* LOG_INFO << "TcpClient::connect[" << name_ << "] - connecting to "
            << connector_->serverAddress().toIpPort();*/
   connect_ = true;
-  connector_->start();
+  connector_->Start();
 }
 
-void TcpClient::disconnect()
+void TcpClient::Disconnect()
 {
   connect_ = false;
 
@@ -93,29 +94,29 @@ void TcpClient::disconnect()
   }
 }
 
-void TcpClient::stop()
+void TcpClient::Stop()
 {
   connect_ = false;
-  connector_->stop();
+  connector_->Stop();
 }
 
-void TcpClient::newConnection(int sockfd)
+void TcpClient::NewConnection(int sockfd)
 {
     loop_->AssertInLoopThread();
 
     // FIXME poll with zero timeout to double confirm the new connection
     // FIXME use make_shared if necessary
     char buf[32];
-    snprintf(buf, sizeof buf, ":#%d", nextConnId_);
-    ++nextConnId_;
+    snprintf(buf, sizeof buf, ":#%d", nextconnid_);
+    ++nextconnid_;
     string connname = name_ + buf;
     TcpConnectionPtr conn(make_shared<TcpConnection>(loop_, connname, sockfd));
     conn->Init();
     conn->set_connectioncallback(connectioncallback_);
     conn->set_messagecallback(messagecallback_);
-    conn->set_writecompletecallback(writeCompleteCallback_);
+    conn->set_writecompletecallback(writecompletecallback_);
     conn->set_closecallback(
-        std::bind(&TcpClient::removeConnection, this, _1)); // FIXME: unsafe
+        std::bind(&TcpClient::RemoveConnection, this, _1)); // FIXME: unsafe
     {
         lock_guard<mutex> lock(mutex_);
         connection_ = conn;
@@ -123,7 +124,7 @@ void TcpClient::newConnection(int sockfd)
     conn->OnConnectEstablished();
 }
 
-void TcpClient::removeConnection(const TcpConnectionPtr& conn)
+void TcpClient::RemoveConnection(const TcpConnectionPtr& conn)
 {
   loop_->AssertInLoopThread();
   assert(loop_ == conn->get_loop());
@@ -137,7 +138,7 @@ void TcpClient::removeConnection(const TcpConnectionPtr& conn)
   loop_->QueueInLoop(std::bind(&TcpConnection::OnConnectDestroyed, conn));
   if (retry_ && connect_)
   {
-    connector_->restart();
+    connector_->Restart();
   }
 }
 

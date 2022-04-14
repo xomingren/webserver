@@ -30,7 +30,7 @@
             CurrentThread::t_cachedTid = 0;
             CurrentThread::t_threadName = "main";
             CurrentThread::Tid();
-            // no need to call pthread_atfork(NULL, NULL, &afterFork);
+            // no need to call pthread_atfork(nullptr, nullptr, &afterFork);
         }
 
         class ThreadNameInitializer
@@ -40,7 +40,7 @@
             {
                 CurrentThread::t_threadName = "main";
                 CurrentThread::Tid();
-                pthread_atfork(NULL, NULL, &AfterFork);
+                pthread_atfork(nullptr, nullptr, &AfterFork);
             }
         };
 
@@ -59,19 +59,19 @@
                 pid_t* tid,
                 std::latch* latch)
                 : func_(std::move(func)),
-                name_(name),
-                tid_(tid),
-                latch_(latch)
+                  name_(name),
+                  tid_(tid),
+                  latch_(latch)
             { }
 
             void RunInThread()
             {
                 *tid_ = CurrentThread::Tid();
-                tid_ = NULL;
+                tid_ = nullptr;
                 latch_->count_down();
-                latch_ = NULL;
+                latch_ = nullptr;
 
-                CurrentThread::t_threadName = name_.empty() ? "tinymuduoThread" : name_.c_str();
+                CurrentThread::t_threadName = name_.empty() ? "tinymuduothread" : name_.c_str();
                 ::prctl(PR_SET_NAME, CurrentThread::t_threadName);
                 try
                 {
@@ -107,7 +107,7 @@
             ThreadData* data = static_cast<ThreadData*>(obj);
             data->RunInThread();
             delete data;
-            return NULL;
+            return nullptr;
         }
 
     }  // namespace detail
@@ -131,18 +131,18 @@
         struct timespec ts = { 0, 0 };
         ts.tv_sec = static_cast<time_t>(usec / Timestamp::kMicroSecondsPerSecond);
         ts.tv_nsec = static_cast<long>(usec % Timestamp::kMicroSecondsPerSecond * 1000);
-        ::nanosleep(&ts, NULL);
+        ::nanosleep(&ts, nullptr);
     }
 
     std::atomic<int32_t> Thread::numcreated_;
 
     Thread::Thread(ThreadFunc func, const std::string& n)
         : started_(false),
-        joined_(false),
-        tid_(0),
-        func_(std::move(func)),
-        name_(n),
-        latch_(1)
+          joined_(false),
+          tid_(0),
+          func_(std::move(func)),
+          name_(n),
+          latch_(1)
     {
         SetDefaultName();
     }

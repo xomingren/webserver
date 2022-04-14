@@ -5,10 +5,17 @@
 
 #include "currentthread_class.h"
 #include "define.h"
-#include "epoll_class.h"
 #include "timerid_class.h"
 #include "timestamp_class.h"
 
+/*problemmark 
+ how to short complier time
+ 1. don't use unnecessary #include in headfile, use forward declared instead
+ 2. delete unnecessary private variable in headfile, use impl
+ 3. don't use unnecessary class inheritance
+*/
+class Channel;
+class Epoll;
 class TimerQueue;
 
 class EventLoop

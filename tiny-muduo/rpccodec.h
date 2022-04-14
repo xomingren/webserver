@@ -9,7 +9,7 @@ namespace detail
 	//class TcpConnection;
 	//typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 
-	typedef std::shared_ptr<tiny_muduo_rpc::RpcMessage> RpcMessagePtr;
+	using RpcMessagePtr = std::shared_ptr<tiny_muduo_rpc::RpcMessage> ;
 	extern const char rpctag[5];
 	// wire format
 	//
@@ -20,7 +20,7 @@ namespace detail
 	// payload   N-byte
 	// checksum  4-byte  adler32 of "RPC0"+payload
 	//
-	typedef ProtobufCodecRpcT<tiny_muduo_rpc::RpcMessage, rpctag> RpcCodec;
+	using RpcCodec = ProtobufCodecRpcT<tiny_muduo_rpc::RpcMessage, rpctag>;
 }
 
 

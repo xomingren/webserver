@@ -1,11 +1,12 @@
 #pragma once
 
 class Timer;
+
 class TimerId
 {
 public:
     TimerId()
-        : timer_(NULL),
+        : timer_(nullptr),
         sequence_(0)
     {
     }

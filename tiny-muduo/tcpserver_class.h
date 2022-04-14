@@ -5,16 +5,19 @@
 #include <map>
 #include <string>
 
-#include "acceptor_class.h"
-#include "channel_class.h"
 #include "define.h"
-#include "eventloop_class.h"
 #include "noncopyable_class.h"
 #include "tcpconnection_class.h"
+
+class Acceptor;
+class EventLoop;
+class EventLoopThreadPool;
 
 class TcpServer :public noncopyable
 {	
 public:
+	using ThreadInitCallback = std::function<void(EventLoop*)> ;
+
 	explicit TcpServer(EventLoop* loop);
 	~TcpServer();
 
@@ -26,9 +29,13 @@ public:
 	{ writecompletecallback_ = std::move(cb); }
 	void set_highwatermarkcallback(HighWaterMarkCallback cb, size_t highwatermark)
 	{ highwatermarkcallback_ = cb; highwatermark_ = highwatermark; }
+	void setThreadInitCallback(const ThreadInitCallback& cb)
+	{ threadinitcallback_ = cb; }
 
 	void Start();
 	void OnNewConnection(SocketFD socketfd);
+
+	void SetThreadNum(int numthreads);
 
 private:
 	void RemoveConnection(const TcpConnectionPtr& conn);
@@ -36,15 +43,17 @@ private:
 
 	using ConnectionMap = std::map<std::string, TcpConnectionPtr>;
 	ConnectionMap connections_;
-	Acceptor* acceptor_;
-	EventLoop* loop_;
+	std::unique_ptr<Acceptor> acceptor_;
+	EventLoop* loop_; //acceptor loop
 	size_t highwatermark_;
 	int nextconnid_;
+	std::shared_ptr<EventLoopThreadPool> threadpool_;//for multi-reactor
+	std::atomic<int32_t> started_;
 
 	ConnectionCallback connectioncallback_;
 	MessageCallback messagecallback_;
 	WriteCompleteCallback writecompletecallback_;
 	HighWaterMarkCallback highwatermarkcallback_;
-	
+	ThreadInitCallback threadinitcallback_;
 };
 
