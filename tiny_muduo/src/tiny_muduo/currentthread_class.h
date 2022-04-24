@@ -6,39 +6,39 @@
 namespace CurrentThread
 {
     // internal
-    extern __thread int t_cachedTid;
-    extern __thread char t_tidString[32];
-    extern __thread int t_tidStringLength;
-    extern __thread const char* t_threadName;
+    extern __thread unsigned int t_cachedtid;
+    extern __thread char t_tidstring[32];
+    extern __thread int t_tidstringlength;
+    extern __thread const char* t_threadname;
     void CacheTid();
 
-    inline int Tid()
+    inline unsigned int Tid()
     {
-        if (__builtin_expect(t_cachedTid == 0, 0))
+        if (__builtin_expect(t_cachedtid == 0, 0))
         {
             CacheTid();
         }
-        return t_cachedTid;
+        return t_cachedtid;
     }
 
     inline const char* TidString() // for logging
     {
-        return t_tidString;
+        return t_tidstring;
     }
 
     inline int TidStringLength() // for logging
     {
-        return t_tidStringLength;
+        return t_tidstringlength;
     }
 
     inline const char* Name()
     {
-        return t_threadName;
+        return t_threadname;
     }
 
     bool IsMainThread();
 
-    void SleepUsec(int64_t usec);  // for testing
+    void SleepMicroSeconds(int64_t microsec);  // for testing, microsec
 
     std::string StackTrace(bool demangle);
 }  // namespace CurrentThread

@@ -2,12 +2,12 @@
 
 #include "../commonfunction.h"
 #include <functional>
-#include <iostream>
 
 #include "rpcchannel_class.h"
 
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/service.h>
+#include "../log.h"
 
 using namespace std;
 using namespace placeholders;
@@ -34,7 +34,8 @@ void RpcServer::Start()
 
 void RpcServer::OnConnection(const TcpConnectionPtr& conn)
 {
-    cout << (conn->Connected() ? "UP" : "DOWN") << endl;;
+    LOG_INFO << (conn->Connected() ? "UP" : "DOWN");
+
     if (conn->Connected())
     {
         RpcChannelPtr channel(make_shared <RpcChannel>(conn));

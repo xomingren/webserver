@@ -1,5 +1,5 @@
-#include <mutex>
 #include <iostream>
+#include <mutex>
 #include <stdio.h>
 #include <unistd.h>
 #include <string_view>
@@ -9,6 +9,8 @@
 #include "../../tiny_muduo/eventloopthread_class.h"
 #include "../../tiny_muduo/tcpclient_class.h"
 
+#include "../../tiny_muduo/log.h"
+
 using namespace std;
 using namespace placeholders;
 
@@ -17,7 +19,7 @@ class ChatClient : noncopyable
 public:
     ChatClient(EventLoop* loop)
         : client_(loop),
-        codec_(std::bind(&ChatClient::onStringMessage, this, _1, _2, _3))
+        codec_(std::bind(&ChatClient::OnStringMessage, this, _1, _2, _3))
     {
         client_.set_connectioncallback(
             std::bind(&ChatClient::onConnection, this, _1));
@@ -48,7 +50,7 @@ public:
 private:
     void onConnection(const TcpConnectionPtr& conn)
     {
-        cout << (conn->Connected() ? "UP" : "DOWN");
+        LOG_INFO << (conn->Connected() ? "UP" : "DOWN");
 
         unique_lock<mutex> lock(mutex_);
         if (conn->Connected())
@@ -61,11 +63,11 @@ private:
         }
     }
 
-    void onStringMessage(const TcpConnectionPtr&,
+    void OnStringMessage(const TcpConnectionPtr&,
         const string& message,
         Timestamp)
     {
-        printf("<<< %s\n", message.c_str());
+        cout << message << endl;
     }
 
     TcpClient client_;
@@ -76,7 +78,11 @@ private:
 
 int main(int argc, char* argv[])
 {
-    cout << "pid = " << getpid();
+    char* curdir;
+    curdir = getcwd(NULL, 0);
+    tiny_muduo_log::Initialize(tiny_muduo_log::GuaranteedLogger(), string(curdir) + "/", "tinymuduolog", 1);
+
+    LOG_INFO << "pid = " << getpid();
 
     EventLoopThread loopThread;
 

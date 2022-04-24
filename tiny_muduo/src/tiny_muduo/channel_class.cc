@@ -3,9 +3,11 @@
 #include <sys/epoll.h>
 
 #include <assert.h>
-#include <iostream>
+#include <sstream>
 
 #include "eventloop_class.h"
+
+#include "log.h"
 
 using namespace std;
 
@@ -86,21 +88,19 @@ void Channel::Tie(const std::shared_ptr<void>& obj)
 void Channel::HandleEventWithGuard(Timestamp receivetime)
 {
 	eventhandling_ = true;
-	//LOG_TRACE << reventsToString();
+	LOG_INFO << ReventsToString();
 	if ((revents_ & EPOLLHUP/*close write and close*/) && !(revents_ & EPOLLIN))
 	{
-		//if (logHup_)
-		{
-			cout << "fd = " << FD_ << " Channel::handle_event() EPOLLHUP";
-		}
+		LOG_WARN << "fd = " << FD_ << " : EPOLLHUP";
+		
 		if (closecallback_)
 			closecallback_();
 	}
 
-	//if (revents_ & (EPOLLERR | EBADF))
-	//{
-	//	if (errorCallback_) errorCallback_();//fixme
-	//}
+	if (revents_ & EBADF)
+	{
+	LOG_WARN << "fd = " << FD_ << " : EBADF";
+	}
 	if (revents_ & (EPOLLIN | EPOLLPRI/*urgent come*/ | EPOLLRDHUP/*client close connection*/))
 	{
 		if (readcallback_) 
@@ -126,4 +126,36 @@ void Channel::Remove()
 	assert(IsNoneEvent());
 	addedtoloop_ = false;
 	loop_->RemoveChannel(this);
+}
+
+string Channel::ReventsToString() const
+{
+	return EventsToString(FD_, revents_);
+}
+
+string Channel::EventsToString() const
+{
+	return EventsToString(FD_, events_);
+}
+
+string Channel::EventsToString(int fd, int ev)
+{
+	std::ostringstream oss;
+	oss << "fd = " << fd << ": ";
+	if (ev & EPOLLIN)
+		oss << "IN ";
+	if (ev & EPOLLPRI)//There is urgent data available for read(2) operations
+		oss << "PRI ";
+	if (ev & EPOLLOUT)
+		oss << "OUT ";
+	if (ev & EPOLLHUP)//response with RST. nonsense request 1.connect from not listening port 2.closed connect resend
+		oss << "HUP ";
+	if (ev & EPOLLRDHUP)// close connect 1. remote shutdown or close 2. local shutdown
+		oss << "RDHUP ";
+	if (ev & EPOLLERR)//local error
+		oss << "ERR ";
+	if (ev & EBADF)// fd invalid
+		oss << "NVAL ";
+
+	return oss.str();
 }

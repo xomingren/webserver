@@ -7,10 +7,10 @@
 #include <string.h>//for memcpy
 #include <vector>
 
-//#include "define.h"
+#include "noncopyable_class.h"
 
 //all write/read operation to buffer and IO,should be done in IO thread,not in workers in threadpool but before it
-class Buffer
+class Buffer : public noncopyable
 {
 public:
     using FD = int;
@@ -26,9 +26,6 @@ public:
         assert(WritableBytes() == initialSize);
         assert(PrependableBytes() == kCheapPrepend);
     }
-    Buffer(const Buffer&) = delete;
-    Buffer& operator =(const Buffer&) = delete;
-    ~Buffer() = default;
 
     char* Begin()
     { return &*buffer_.begin(); }
@@ -47,7 +44,7 @@ public:
         return ntohl(be32);
     }
 
-    const char* findCRLF() const
+    const char* FindCRLF() const
     {  
         // FIXME: replace with memmem()?
         const char* crlf = std::search(Peek(), BeginWrite(), kCRLF, kCRLF + 2);

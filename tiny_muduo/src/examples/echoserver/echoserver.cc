@@ -1,7 +1,7 @@
 #include <atomic>
 #include <functional>//for std::bind
 #include <iconv.h>
-#include <iostream>//for cout
+#include <iostream>
 #include <memory.h>//for memset
 #include <string>
 
@@ -11,6 +11,8 @@
 #include "../../tiny_muduo/eventloop_class.h"
 #include "../../tiny_muduo/tcpconnection_class.h"
 #include "../../tiny_muduo/tcpserver_class.h"
+
+#include "../../tiny_muduo/log.h"
 
 using namespace std;
 
@@ -90,7 +92,7 @@ EchoServer::EchoServer(EventLoop* loop)
 
 void EchoServer::OnConnection(const TcpConnectionPtr& tcpconnection)
 {
-	cout << "onconnection" << endl;;
+	LOG_INFO << "OnConnection().";
 }
 
 //for recieve buf directly
@@ -139,12 +141,12 @@ void EchoServer::OnMessage(const TcpConnectionPtr& tcpconnection, const std::str
 
 void EchoServer::OnWriteComplete(const TcpConnectionPtr& tcpconnection)
 {
-	cout << "onWriteComplete" << endl;
+	LOG_INFO << "OnWriteComplete().";
 }
 
 void EchoServer::OnHighWaterMark(const TcpConnectionPtr& conn, size_t len)
 {
-	cout << "HighWaterMark " << len;
+	LOG_INFO << "OnHighWaterMark().";
 }
 
 void EchoServer::PrintThroughput()
@@ -165,6 +167,10 @@ void EchoServer::PrintThroughput()
 
 int main(int args, char** argv)
 {
+	char* curdir;
+	curdir = getcwd(NULL, 0);
+	tiny_muduo_log::Initialize(tiny_muduo_log::GuaranteedLogger(), string(curdir) + "/", "tinymuduolog", 1);
+
 	EventLoop loop;
 	EchoServer echoserver(&loop);
 	echoserver.Start();

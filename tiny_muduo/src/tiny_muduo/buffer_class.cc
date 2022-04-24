@@ -3,7 +3,7 @@
 #include <sys/uio.h>//for readv
 #include <unistd.h>//for close()
 
-#include<iostream>//for cout
+#include "log.h"
 
 using namespace std;
 
@@ -30,19 +30,19 @@ ssize_t Buffer::ReadFd(FD fd)//if we use epollet, this function should be in a w
     {
         if (errno == ECONNRESET)
         {
-            cout << "ECONNREST closed socket fd:" << fd << endl;
+            LOG_CRIT << "ECONNREST closed socket fd:" << fd;
             close(fd);
         }
     }
     else if (readlength == 0)
     {
-        cout << "read 0 closed socket fd:" << fd << endl;
+        LOG_INFO << "read 0 closed socket fd:" << fd;
         close(fd);
     }
     else if (static_cast<size_t>(readlength) <= writable)//means extra not use
     {
         writerindex_ += readlength;
-        cout << "recieved " << readlength << " bytes of data" << endl;
+        LOG_INFO << "recieved " << readlength << " bytes of data";
     }
     else//use extra,with readlength - writable
     {

@@ -4,17 +4,17 @@
 #include <unistd.h>//for read write close
 #include <sys/socket.h>
 
-#include <iostream>//for cout
-
 #include "channel_class.h"
 #include "commonfunction.h"
 #include "eventloop_class.h"
+
+#include "log.h"
 
 using namespace std;
 
 void DefaultConnectionCallback(const TcpConnectionPtr& conn)
 {
-    cout << (conn->Connected() ? "UP" : "DOWN");
+    LOG_INFO << (conn->Connected() ? "UP" : "DOWN");
     // do not call conn->forceClose(), because some users want to register message callback only.
 }
 
@@ -38,7 +38,7 @@ TcpConnection::TcpConnection(EventLoop* loop, const std::string& nameArg, FD soc
 
 TcpConnection::~TcpConnection()
 {
-    cout << "TcpConnection::dtor[" << "] at " << this
+    LOG_INFO << "TcpConnection::dtor[" << "] at " << reinterpret_cast<char*>(this)
         << " fd=" << channel_->get_FD();
     assert(state_ == StateE::kDisconnected);
 }
@@ -60,7 +60,7 @@ void TcpConnection::HandleRead(Timestamp receivetime)
 void TcpConnection::HandleClose()
 {
     loop_->AssertInLoopThread();
-    cout << "fd = " << channel_->get_FD() << " state = " << StateToString();
+    LOG_INFO << "fd = " << channel_->get_FD() << " state = " << StateToString();
     assert(state_ == StateE::kConnected || state_ == StateE::kDisconnecting);//fixme with cas
     // we don't close fd, leave it to dtor, so we can find leaks easily.
     set_state(StateE::kDisconnected);
@@ -80,7 +80,7 @@ void TcpConnection::HandleWrite()
         ssize_t wrotelength = ::write(channel_->get_FD(), outbuf_.Peek(), outbuf_.ReadableBytes());
         if (wrotelength > 0)
         {
-            cout << "write " << wrotelength << " bytes data again" << endl;
+            LOG_INFO << "write " << wrotelength << " bytes data again";
             outbuf_.Retrieve(wrotelength);
             if (0 == outbuf_.ReadableBytes())//wrote done
             {
@@ -157,7 +157,7 @@ void TcpConnection::SendInLoop(const void* data, size_t len)
     bool faultError = false;
     if (state_ == StateE::kDisconnected)
     {
-        cout << "disconnected, give up writing";
+        LOG_INFO << "disconnected, give up writing";
         return;
     }
     // 1.if no thing in output queue, try writing directly
@@ -177,7 +177,7 @@ void TcpConnection::SendInLoop(const void* data, size_t len)
             nwrote = 0;
             if (errno != EWOULDBLOCK)
             {
-                cout << "TcpConnection::SendInLoop";
+                LOG_CRIT << "TcpConnection::SendInLoop";
                 if (errno == EPIPE || errno == ECONNRESET) // FIXME: any others?
                 {
                     faultError = true;

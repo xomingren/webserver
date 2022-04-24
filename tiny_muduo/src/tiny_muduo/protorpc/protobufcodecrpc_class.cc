@@ -7,6 +7,7 @@
 #include "../tcpconnection_class.h"
 
 #include <google/protobuf/message.h>
+#include "../log.h"
 
 using namespace std;
 
@@ -134,7 +135,7 @@ void ProtobufCodecRpc::DefaultErrorCallback(const TcpConnectionPtr& conn,
     Timestamp,
     ErrorCode errorcode)
 {
-    cout << "ProtobufCodecLite::defaultErrorCallback - " << ErrorCodeToString(errorcode);
+    LOG_CRIT << "ProtobufCodecRpc::DefaultErrorCallback - " << ErrorCodeToString(errorcode);
     if (conn && conn->Connected())
     {
         conn->Shutdown();

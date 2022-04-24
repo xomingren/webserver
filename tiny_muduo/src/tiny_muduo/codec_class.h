@@ -2,12 +2,13 @@
 
 #include <arpa/inet.h>
 
-#include <iostream>
 #include <string_view>
 
 #include "buffer_class.h"
 #include "noncopyable_class.h"
 #include "tcpconnection_class.h"
+
+#include "log.h"
 
 class LengthHeaderCodec : noncopyable
 {
@@ -33,7 +34,7 @@ public:
             const int32_t len = ntohl(be32);
             if (len > 65536 || len < 0)
             {
-                std::cout << "Invalid length " << len;
+                LOG_CRIT << "invalid length " << len;
                 conn->Shutdown();  // FIXME: disable reading
                 break;
             }

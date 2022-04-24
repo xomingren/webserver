@@ -2,8 +2,6 @@
 #include <unistd.h>  // usleep
 #include <stdio.h>
 
-#include <iostream>
-
 #include "../tiny_muduo/currentthread_class.h"
 #include "../tiny_muduo/threadpool_class.h"
 

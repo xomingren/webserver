@@ -20,15 +20,15 @@
 namespace detail
 {
 
-    pid_t Gettid()
+    unsigned int Gettid()
     {
-        return static_cast<pid_t>(::syscall(SYS_gettid));
+        return static_cast<unsigned int>(::syscall(SYS_gettid));
     }
 
     void AfterFork()
     {
-        CurrentThread::t_cachedTid = 0;
-        CurrentThread::t_threadName = "main";
+        CurrentThread::t_cachedtid = 0;
+        CurrentThread::t_threadname = "main";
         CurrentThread::Tid();
         // no need to call pthread_atfork(nullptr, nullptr, &afterFork);
     }
@@ -38,7 +38,7 @@ namespace detail
     public:
         ThreadNameInitializer()
         {
-            CurrentThread::t_threadName = "main";
+            CurrentThread::t_threadname = "main";
             CurrentThread::Tid();
             pthread_atfork(nullptr, nullptr, &AfterFork);
         }
@@ -71,12 +71,12 @@ namespace detail
             latch_->count_down();
             latch_ = nullptr;
 
-            CurrentThread::t_threadName = name_.empty() ? "tinymuduothread" : name_.c_str();
-            ::prctl(PR_SET_NAME, CurrentThread::t_threadName);
+            CurrentThread::t_threadname = name_.empty() ? "tinymuduothread" : name_.c_str();
+            ::prctl(PR_SET_NAME, CurrentThread::t_threadname);
             try
             {
                 func_();
-                CurrentThread::t_threadName = "finished";
+                CurrentThread::t_threadname = "finished";
             }
             /* catch (const Exception& ex)//fixme
             {
@@ -88,14 +88,14 @@ namespace detail
             }*/
             catch (const std::exception& ex)
             {
-                CurrentThread::t_threadName = "crashed";
+                CurrentThread::t_threadname = "crashed";
                 fprintf(stderr, "exception caught in Thread %s\n", name_.c_str());
                 fprintf(stderr, "reason: %s\n", ex.what());
                 abort();
             }
             catch (...)
             {
-                CurrentThread::t_threadName = "crashed";
+                CurrentThread::t_threadname = "crashed";
                 fprintf(stderr, "unknown exception caught in Thread %s\n", name_.c_str());
                 throw; // rethrow
             }
@@ -114,10 +114,10 @@ namespace detail
 
     void CurrentThread::CacheTid()
     {
-        if (t_cachedTid == 0)
+        if (t_cachedtid == 0)
         {
-            t_cachedTid = detail::Gettid();
-            t_tidStringLength = snprintf(t_tidString, sizeof t_tidString, "%5d ", t_cachedTid);
+            t_cachedtid = detail::Gettid();
+            t_tidstringlength = snprintf(t_tidstring, sizeof t_tidstring, "%5d ", t_cachedtid);
         }
     }
 
@@ -126,11 +126,11 @@ namespace detail
         return Tid() == ::getpid();
     }
 
-    void CurrentThread::SleepUsec(int64_t usec)
+    void CurrentThread::SleepMicroSeconds(int64_t microsec)
     {
         struct timespec ts = { 0, 0 };
-        ts.tv_sec = static_cast<time_t>(usec / Timestamp::kMicroSecondsPerSecond);
-        ts.tv_nsec = static_cast<long>(usec % Timestamp::kMicroSecondsPerSecond * 1000);
+        ts.tv_sec = static_cast<time_t>(microsec / Timestamp::kMicroSecondsPerSecond);
+        ts.tv_nsec = static_cast<long>(microsec % Timestamp::kMicroSecondsPerSecond * 1000);
         ::nanosleep(&ts, nullptr);
     }
 

@@ -1,8 +1,6 @@
-#include <stdio.h>
 #include <unistd.h>
 
 #include <functional>
-#include <iostream>
 #include <memory>
 
 #include "../../../tiny_muduo/eventloop_class.h"
@@ -11,6 +9,8 @@
 #include "protobufdispatcher_class.h"
 #include "query.pb.h"
 #include "../../../tiny_muduo/tcpserver_class.h"
+
+#include "../../../tiny_muduo/log.h"
 
 using namespace std;
 
@@ -43,14 +43,15 @@ public:
 private:
     void OnConnection(const TcpConnectionPtr& conn)
     {
-        cout << (conn->Connected() ? "UP" : "DOWN");
+        LOG_INFO << (conn->Connected() ? "UP" : "DOWN");
     }
 
     void OnUnknownMessage(const TcpConnectionPtr& conn,
         const MessagePtr& message,
         Timestamp)
     {
-        cout << "onUnknownMessage: " << message->GetTypeName();
+        LOG_WARN << "OnUnknownMessage: " << message->GetTypeName();
+        cout << "OnUnknownMessage: " << message->GetTypeName();
         conn->Shutdown();
     }
 
@@ -58,7 +59,7 @@ private:
         const QueryPtr& message,
         Timestamp)
     {
-        cout << "onQuery:\n" << message->GetTypeName() << "\n" << message->DebugString();
+        cout << "OnQuery:\n" << message->GetTypeName() << "\n" << message->DebugString();
         tiny_muduo::Answer answer;
         answer.set_id(1);
         answer.set_questioner(message->questioner());
@@ -74,7 +75,7 @@ private:
         const AnswerPtr& message,
         Timestamp)
     {
-        cout << "onAnswer: " << message->GetTypeName();
+        cout << "OnAnswer: " << message->GetTypeName();
         conn->Shutdown();
     }
 
@@ -85,7 +86,12 @@ private:
 
 int main(int argc, char* argv[])
 {
-    /*LOG_INFO << "pid = " << getpid();*/
+    char* curdir;
+    curdir = getcwd(NULL, 0);
+    tiny_muduo_log::Initialize(tiny_muduo_log::GuaranteedLogger(), string(curdir) + "/", "tinymuduolog", 1);
+
+    LOG_INFO << "pid = " << getpid();
+
     EventLoop loop; 
     QueryServer server(&loop);
     server.Start();

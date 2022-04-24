@@ -3,18 +3,19 @@
 #include <errno.h> //for errno
 #include <sys/epoll.h>
 
-#include <iostream>//for cout
 #include <string.h>//for memset
 
 #include "channel_class.h"
+
+#include "log.h"
 
 using namespace std;
 
 Epoll::Epoll()
   : epollfd_(::epoll_create1(EPOLL_CLOEXEC))
 {
-    if (epollfd_ <= 0)
-        cout << "epoll_create error, errno:" << epollfd_ << endl;
+    if (epollfd_ < 0)
+        LOG_CRIT << "epoll_create1 error, errno:" << errno;
 }
 
 Epoll::~Epoll()
@@ -29,7 +30,7 @@ Timestamp Epoll::Poll(std::vector<Channel*>* channels)
     Timestamp now(Timestamp::Now());
     if (fds == -1)
     {
-        cout << "epoll_wait error, errno:" << errno << endl;
+        LOG_CRIT << "epoll_wait error, errno:" << errno;
     }
     for (int i = 0; i < fds; ++i)
     {

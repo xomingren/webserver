@@ -1,6 +1,9 @@
 #include <functional>
 #include <memory>
 
+#include <stdio.h>
+#include <unistd.h>
+
 #include "../../../tiny_muduo/eventloop_class.h"
 #include "../../../tiny_muduo/noncopyable_class.h"
 #include "protobufcodec_class.h"
@@ -8,8 +11,9 @@
 #include "query.pb.h"
 #include "../../../tiny_muduo/tcpclient_class.h"
 
-#include <stdio.h>
-#include <unistd.h>
+#include "../../../tiny_muduo/log.h"
+
+
 
 using namespace std;
 using namespace std::placeholders;
@@ -47,7 +51,7 @@ private:
 
     void OnConnection(const TcpConnectionPtr& conn)
     {
-        cout << (conn->Connected() ? "UP" : "DOWN");
+        LOG_INFO << (conn->Connected() ? "UP" : "DOWN");
 
         if (conn->Connected())
         {
@@ -63,6 +67,7 @@ private:
         const MessagePtr& message,
         Timestamp)
     {
+        LOG_WARN << "OnUnknownMessage: " << message->GetTypeName();
         cout << "OnUnknownMessage: " << message->GetTypeName();
     }
 
@@ -70,6 +75,7 @@ private:
         const AnswerPtr& message,
         Timestamp)
     {
+        LOG_INFO << "OnAnswer:\n" << message->GetTypeName() << message->DebugString();
         cout << "OnAnswer:\n" << message->GetTypeName() << message->DebugString();
     }
 
@@ -77,6 +83,7 @@ private:
         const EmptyPtr& message,
         Timestamp)
     {
+        LOG_INFO << "OnEmpty: " << message->GetTypeName();
         cout << "OnEmpty: " << message->GetTypeName();
     }
 
@@ -88,7 +95,11 @@ private:
 
 int main(int argc, char* argv[])
 {
-    /*LOG_INFO << "pid = " << getpid();*/
+    char* curdir;
+    curdir = getcwd(NULL, 0);
+    tiny_muduo_log::Initialize(tiny_muduo_log::GuaranteedLogger(), string(curdir) + "/", "tinymuduolog", 1);
+
+    LOG_INFO << "pid = " << getpid();
     
     EventLoop loop;
 

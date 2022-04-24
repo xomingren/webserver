@@ -59,7 +59,12 @@ public:
 	{ return loop_; }
 	void Remove();
 
+	std::string ReventsToString() const;
+	std::string EventsToString() const;
+
 private:
+	static std::string EventsToString(int fd, int ev);
+
 	void Update();//update my sockedfd to epfd
 	void HandleEventWithGuard(Timestamp receivetime);
 

@@ -11,6 +11,8 @@
 #include "commonfunction.h"
 #include "eventloop_class.h"
 
+using namespace std;
+
 const int Connector::kMaxRetryDelayMs;
 
 Connector::Connector(EventLoop* loop)
@@ -137,14 +139,14 @@ void Connector::Restart()
 void Connector::Connecting(int sockfd)
 {
     set_state(States::kConnecting);
-  assert(!channel_);
-  channel_.reset(new Channel(loop_, sockfd));
-  channel_->set_writecallback(
-      std::bind(&Connector::HandleWrite, this)); // FIXME: unsafe
+    assert(!channel_);
+    channel_.reset(make_unique<Channel>(loop_, sockfd).release());
+    channel_->set_writecallback(
+    std::bind(&Connector::HandleWrite, this)); // FIXME: unsafe
 
   // channel_->tie(shared_from_this()); is not working,
   // as channel_ is not managed by shared_ptr
-  channel_->EnableWrite();
+    channel_->EnableWrite();
 }
 
 int Connector::RemoveAndResetChannel()

@@ -4,9 +4,9 @@
 #include <errno.h> //for errno
 #include <fcntl.h> // for fcntl()
 
-#include <iostream>//for cout
-
 #include "eventloop_class.h"
+
+#include "log.h"
 
 using namespace std;
 
@@ -34,16 +34,15 @@ void Acceptor::OnAccept()
     connectfd = accept(listenfd_, reinterpret_cast<sockaddr*>(&cliaddr), &clilen);
     if (connectfd > 0)
     {
-        cout << "new connection from "
+        LOG_INFO << "new connection from "
             << "[" << inet_ntoa(cliaddr.sin_addr)
             << ":" << ntohs(cliaddr.sin_port) << "]"
-            << " new socket fd:" << connectfd
-            << endl;
+            << " new socket fd:" << connectfd;
     }
     else
     {
-        cout << "accept error, connfd:" << connectfd
-            << " errno:" << errno << endl;
+        LOG_CRIT << "accept error, connfd:" << connectfd
+            << " errno:" << errno;
     }
 
     // non-block
@@ -82,12 +81,12 @@ SocketFD Acceptor::CreateSocketAndListenOrDie()
 
     if (-1 == bind(listensocket, reinterpret_cast<sockaddr*>(&servaddr), sizeof(servaddr)))
     {
-        cout << "bind error, errno:" << errno << endl;
+        LOG_CRIT << "bind error, errno:" << errno;
     }
 
     if (-1 == listen(listensocket, SOMAXCONN))//2nd param is the queue size kernel keeped that done with 3 handshake and haven't been accepted
     {//there are 2 kinds of queue in tcp handshake stage, 2nd param used in full-conn queue,half-conn queue'size <= SOMAXCONN
-        cout << "listen error, errno:" << errno << endl;
+        LOG_CRIT << "listen error, errno:" << errno;
     }
     return listensocket;
 }

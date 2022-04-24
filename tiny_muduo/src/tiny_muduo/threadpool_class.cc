@@ -5,7 +5,7 @@
 using namespace std;
 
 ThreadPool::ThreadPool(const string& namearg)
-    : mutex_(),
+  : mutex_(),
     notempty_(),
     notfull_(),
     name_(namearg),

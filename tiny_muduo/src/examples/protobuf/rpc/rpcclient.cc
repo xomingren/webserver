@@ -1,5 +1,5 @@
-#include <functional>
 #include <iostream>
+#include <functional>
 #include <string>
 #include <unistd.h>
 
@@ -10,6 +10,9 @@
 #include "../../../tiny_muduo/protorpc/rpcchannel_class.h"
 #include "../../../tiny_muduo/tcpclient_class.h"
 #include "../../../tiny_muduo/tcpconnection_class.h"
+
+#include "../../../tiny_muduo/log.h"
+
 
 using namespace std;
 using namespace placeholders;
@@ -75,7 +78,11 @@ private:
 
 int main(int argc, char* argv[])
 {
-   // cout << "pid = " << getpid();
+    char* curdir;
+    curdir = getcwd(NULL, 0);
+    tiny_muduo_log::Initialize(tiny_muduo_log::GuaranteedLogger(), string(curdir) + "/", "tinymuduolog", 1);
+
+    LOG_INFO << "pid = " << getpid();
    
     EventLoop loop;
     RpcClient rpcclient(&loop);

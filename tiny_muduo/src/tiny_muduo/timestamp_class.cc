@@ -5,8 +5,6 @@
 #undef __STDC_FORMAT_MACROS
 #include <sys/time.h>
 
-#include <iostream>
-
 using namespace std;
 
 string Timestamp::ToString(bool showmicroseconds) const
@@ -38,7 +36,7 @@ Timestamp Timestamp::Now()
     return Timestamp(Timestamp::NowMicroSeconds());
 }
 
-int64_t Timestamp::NowMicroSeconds()
+uint64_t Timestamp::NowMicroSeconds()
 {
     struct timeval tv;
     gettimeofday(&tv, nullptr);

@@ -4,6 +4,7 @@
 #include "rpc.pb.h"
 
 #include <google/protobuf/descriptor.h>
+#include "../log.h"
 
 using namespace std;
 using namespace placeholders;
@@ -14,7 +15,7 @@ RpcChannel::RpcChannel()
     : codec_(std::bind(&RpcChannel::OnRpcMessage, this, _1, _2, _3)),
       services_(nullptr)
 {
-    cout << "RpcChannel::ctor - " << this;
+    LOG_INFO << "RpcChannel::ctor - " << reinterpret_cast<char*>(this);
 }
 
 RpcChannel::RpcChannel(const TcpConnectionPtr& conn)
@@ -22,12 +23,12 @@ RpcChannel::RpcChannel(const TcpConnectionPtr& conn)
       connection_(conn),
       services_(nullptr)
 {
-    cout << "RpcChannel::ctor - " << this;
+    LOG_INFO << "RpcChannel::ctor - " << reinterpret_cast<char*>(this);
 }
 
 RpcChannel::~RpcChannel()
 {
-    cout << "RpcChannel::dtor - " << this;
+    LOG_INFO << "RpcChannel::dtor - " << reinterpret_cast<char*>(this);
     for (const auto& outstanding : outstandings_)
     {
         OutstandingCall out = outstanding.second;
@@ -75,7 +76,6 @@ void RpcChannel::OnRpcMessage(const TcpConnectionPtr& conn,
                               Timestamp receiveTime)
 {
     assert(conn == connection_);
-    //printf("%s\n", message.DebugString().c_str());
     tiny_muduo_rpc::RpcMessage& message = *messagePtr;
     if (message.type() == tiny_muduo_rpc::RESPONSE)
     {

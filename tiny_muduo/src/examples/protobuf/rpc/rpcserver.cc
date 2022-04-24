@@ -6,6 +6,8 @@
 #include "../../../tiny_muduo/protorpc/rpcserver_class.h"
 #include "rpc_example.pb.h"
 
+#include "../../../tiny_muduo/log.h"
+
 using namespace std;
 
 namespace rpc_example
@@ -59,7 +61,12 @@ namespace rpc_example
 
 int main()
 {
-    //cout << "pid = " << getpid();
+    char* curdir;
+    curdir = getcwd(NULL, 0);
+    tiny_muduo_log::Initialize(tiny_muduo_log::GuaranteedLogger(), string(curdir) + "/", "tinymuduolog", 1);
+
+    LOG_INFO << "pid = " << getpid();
+
     EventLoop loop;
     rpc_example::RpcServiceImpl_add add;
     rpc_example::RpcServiceImpl_multiplication multiplication;

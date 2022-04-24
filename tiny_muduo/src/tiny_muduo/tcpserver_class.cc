@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 
-#include <iostream>//for cout
 #include <memory>//for make_shared
 #include <string>
 
@@ -10,6 +9,8 @@
 #include "commonfunction.h"
 #include "eventloop_class.h"
 #include "eventloopthreadpool_class.h"
+
+#include "log.h"
 
 using namespace std;
 
@@ -25,7 +26,7 @@ TcpServer::TcpServer(EventLoop* loop)
 TcpServer::~TcpServer()
 {
     loop_->AssertInLoopThread();
-    cout << "TcpServer::~TcpServer [" << "] destructing";
+    LOG_INFO << "TcpServer::~TcpServer [" << "] destructing";
 
     for (auto& item : connections_)
     {
@@ -74,7 +75,7 @@ void TcpServer::RemoveConnection(const TcpConnectionPtr& conn)
 void TcpServer::RemoveConnectionInLoop(const TcpConnectionPtr& conn)
 {
     loop_->AssertInLoopThread();
-    cout << "TcpServer::removeConnectionInLoop ["
+    LOG_INFO << "TcpServer::removeConnectionInLoop ["
         << "] - connection " << conn->get_name();
     size_t n = connections_.erase(conn->get_name());
     (void)n;

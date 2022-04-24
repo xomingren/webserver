@@ -4,11 +4,12 @@
 #include <unistd.h>//for read/write
 
 #include <assert.h>
-#include <iostream>
 #include <vector>
 
 #include "epoll_class.h"
 #include "timerqueue_class.h"
+
+#include "log.h"
 
 using namespace std;
 
@@ -37,7 +38,6 @@ void EventLoop::Loop()
 {
     while (!quit_)
     {
-        //cout << "epoll waiting等待..." << endl;
         vector<Channel*> channels;
         pollreturntime_ = poller_->Poll(&channels);
 
@@ -82,7 +82,7 @@ void EventLoop::Wakeup()
     ssize_t n = ::write(wakeupfd_, &one, sizeof one);
     if (n != sizeof one)
     {
-        cout << "EventLoop::Wakeup() writes " << n << " bytes instead of 8" << endl;
+        LOG_CRIT << "writes " << n << " bytes instead of 8";
     }
 }
 
@@ -91,7 +91,7 @@ int EventLoop::CreateEventFd()
     FD evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (evtfd < 0)
     {
-        cout << "Failed in eventfd" << endl;
+        LOG_CRIT << "failed in eventfd()";
     }
     return evtfd;
 }
@@ -102,7 +102,7 @@ void EventLoop::HandleRead()
     ssize_t n = ::read(wakeupfd_, &one, sizeof one);
     if (n != sizeof one)
     {
-        cout << "EventEventLoop::handleRead() reads " << n << " bytes instead of 8" << endl;
+        LOG_INFO << "reads " << n << " bytes instead of 8";
     }
 }
 
@@ -145,7 +145,7 @@ void EventLoop::Cancel(TimerId timerId)
 
 void EventLoop::AbortNotInLoopThread()
 {
-    cout << "EventLoop::abortNotInLoopThread - EventLoop " << this
+    LOG_CRIT << "EventLoop::AbortNotInLoopThread - EventLoop " << reinterpret_cast<char*>(this)
         << " was created in threadId_ = " << threadId_
         << ", current thread id = " << CurrentThread::Tid();
 }
@@ -169,7 +169,7 @@ void EventLoop::RemoveChannel(Channel* channel)
     //poller_->RemoveChannel(channel);
 }
 
-void EventLoop::Quit()
+void EventLoop::Quit()//problemmark how and when quit
 {
     quit_ = true;
     // There is a chance that loop() just executes while(!quit_) and exits,

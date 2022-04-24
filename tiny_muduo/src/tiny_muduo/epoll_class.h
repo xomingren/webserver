@@ -2,10 +2,8 @@
 
 #include <vector>
 
-//#include "channel_class.h"
 #include "define.h"
 #include "noncopyable_class.h"
-//#include "timestamp_class.h"
 
 //a epollfd manage class,
 //once epoll_wait return,

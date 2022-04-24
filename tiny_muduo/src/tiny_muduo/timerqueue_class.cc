@@ -6,11 +6,11 @@
 #include <string.h>//for memset
 #include <unistd.h>//for read
 
-#include <iostream>
-
 #include "eventloop_class.h"
 #include "timer_class.h"
 #include "timerid_class.h"
+
+#include "log.h"
 
 using namespace std;
 
@@ -23,7 +23,7 @@ namespace detail
             TFD_NONBLOCK | TFD_CLOEXEC);
         if (timerfd < 0)
         {
-            cout << "Failed in timerfd_create";
+            LOG_CRIT << "Failed in timerfd_create()";
         }
         return timerfd;
     }
@@ -48,10 +48,10 @@ namespace detail
     {
         uint64_t howmany;
         ssize_t n = ::read(timerfd, &howmany, sizeof howmany);
-        cout << "TimerQueue::handleRead() " << howmany << " at " << now.ToString(false)<<"\n";
+        LOG_INFO << "TimerQueue::HandleRead() " << howmany << " at " << now.ToString(false)<<"\n";
         if (n != sizeof howmany)
         {
-            cout << "TimerQueue::handleRead() reads " << n << " bytes instead of 8";
+            LOG_CRIT << "TimerQueue::handleRead() reads " << n << " bytes instead of 8";
         }
     }
 
@@ -66,7 +66,7 @@ namespace detail
         int ret = ::timerfd_settime(timerfd, 0, &newValue, &oldValue);
         if (ret)
         {
-            cout << "timerfd_settime()";
+            LOG_INFO << "timerfd_settime()";
         }
     }
 
@@ -152,7 +152,7 @@ void TimerQueue::HandleRead()//wake up from loop by timerfd_settime
 {
     //loop_->assertInLoopThread();
     Timestamp now(Timestamp::Now());
-    ReadTimerFD(timerFD_, now);//read 8 bytes from fd,and cout
+    ReadTimerFD(timerFD_, now);//read 8 bytes from fd
 
     std::vector<Entry> expired = GetExpired(now);//calling expired timers
 
